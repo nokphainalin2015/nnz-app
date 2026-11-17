@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ບັນຊີ ກຂຄ</title>
+<meta name="apple-mobile-web-app-title" content="ບັນຊີ ກຂຄ">
+<meta name="theme-color" content="#8a2f7a">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<style>html,body{margin:0;height:100%;background:#8a2f7a;color:#fff;font-family:system-ui,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px}
+img{width:120px;height:120px;border-radius:26px;box-shadow:0 6px 20px rgba(0,0,0,.25)}</style>
+</head>
+<body>
+<img src="icon-512.png" alt="ບັນຊີ ກຂຄ">
+<div id="msg">ກຳລັງເປີດ ບັນຊີ ກຂຄ...</div>
+<div id="how" style="display:none;font-size:18px;line-height:1.6">ກົດປຸ່ມ <b>Share ⬆️</b> ລຸ່ມຈໍ<br>→ <b>Add to Home Screen</b><br>→ <b>Add</b></div>
+<script>
+// ເປີດຄັ້ງທຳອິດ: ບອກວິທີເພີ່ມໃສ່ໜ້າຈໍ · ຄັ້ງຕໍ່ໄປ (ກົດຈາກໄອຄອນ): ໄປແອັບບັນຊີເລີຍ
+// ໃຊ້ location.replace ບໍ່ໃຊ້ລິ້ງໃຫ້ກົດ ເພື່ອບໍ່ໃຫ້ iPhone ເດັ້ງໄປແອັບ Claude
+var APP="https://claude.ai/artifact/X79MpkUnd5kWSpDvTkiVYM", seen=false;
+try{ seen=localStorage.getItem("kkkacc_seen")==="1"; localStorage.setItem("kkkacc_seen","1"); }catch(e){}
+if(seen || navigator.standalone || location.hash==="#go"){ setTimeout(function(){ location.replace(APP); }, 500); }
+else { document.getElementById("msg").textContent="ບັນຊີ ກຂຄ"; document.getElementById("how").style.display="block"; }
+</script>
+</body>
+</html>
