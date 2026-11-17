@@ -1,0 +1,13 @@
+{
+  "name": "NNZ ເຂົ້າ-ອອກວຽກ",
+  "short_name": "NNZ ວຽກ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EB2536",
+  "theme_color": "#EB2536",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

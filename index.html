@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NNZ ເຂົ້າ-ອອກວຽກ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NNZ ວຽກ">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#EB2536">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  html,body{margin:0;height:100%;background:#EB2536;font-family:system-ui,sans-serif}
+  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;text-align:center;padding:24px}
+  #splash img{width:120px;height:120px;border-radius:26px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  #splash a{color:#fff;font-size:14px;opacity:.9}
+  #app{position:fixed;left:0;right:0;bottom:0;top:env(safe-area-inset-top);width:100%;height:calc(100% - env(safe-area-inset-top));border:0;background:#f6f7f9;opacity:0;transition:opacity .3s}
+  #app.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="icon-180.png" alt="NNZ">
+  <div>ກຳລັງເປີດແອັບ...</div>
+  <a id="direct" href="#">ເປີດບໍ່ຂຶ້ນ? ກົດບ່ອນນີ້</a>
+</div>
+<iframe id="app" title="NNZ ເຂົ້າ-ອອກວຽກ" allow="camera"></iframe>
+<script>
+  var APP = 'https://script.google.com/macros/s/AKfycbyTkAyvKEjdgrq7U97JCe8cXRD54PCmIo66730Nwpw_JyTrmW4gv4AfUllDPztwMqdNeQ/exec';
+  var f = document.getElementById('app');
+  document.getElementById('direct').href = APP;
+  f.onload = function(){ f.className = 'on'; };
+  f.src = APP;
+</script>
+</body>
+</html>
