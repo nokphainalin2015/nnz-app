@@ -271,6 +271,7 @@ async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.
   catch(e){ try{ if(CFG.sheetCsvUrl) text = await load("products.csv"); else throw e; }catch(e2){ loadErr = "ກວດອິນເຕີເນັດ ແລ້ວລອງເປີດໃໝ່"; } }
   if(text){
     P = parseCSV(text).map(toProduct).filter(p=>p.full>0 || p.trials.length);
+    P.sort((a,b)=>(b.photo?1:0)-(a.photo?1:0)); // ສິນຄ້າທີ່ມີຮູບແທ້ຂຶ້ນກ່ອນ
     // ລາຄາໃນກະຕ່າເກົ່າ ໃຫ້ກົງກັບລາຄາລ່າສຸດ
     cart = cart.filter(l=>P.some(p=>p.id===l.id)).map(l=>{ const p=P.find(x=>x.id===l.id); const t=p.trials.find(t=>("ຂວດແບ່ງ "+t.qty).trim()===l.opt); return {...l, nm:p.nm, price: t? t.price : (p.full||l.price)}; });
     save();
