@@ -1,0 +1,15 @@
+{
+  "name": "nnz ວິຕາມິນ",
+  "short_name": "nnz",
+  "description": "ວິຕາມິນ ແລະ ອາຫານເສີມນຳເຂົ້າຈາກ ນິວຊີແລນ ແລະ ອົດສະຕາລີ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3f1",
+  "theme_color": "#e52535",
+  "lang": "lo",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
