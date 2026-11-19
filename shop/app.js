@@ -80,7 +80,8 @@ function shapeOf(p){
 }
 function pic(p){
   if(p.photo){
-    const src = /^https?:/i.test(p.photo) ? p.photo : "images/" + p.photo;
+    const gd = (p.photo.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=|thumbnail\?id=)([\w-]{20,})/)||[])[1];
+    const src = gd ? `https://drive.google.com/thumbnail?id=${gd}&sz=w800` : /^https?:/i.test(p.photo) ? p.photo : "images/" + p.photo;
     return `<img src="${esc(src)}" alt="${esc(p.nm)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`;
   }
   const h = p.hue, dark = `hsl(${h} 45% 28%)`, main = `hsl(${h} 62% 52%)`, soft = `hsl(${h} 70% 95%)`, ink = `hsl(${h} 45% 20%)`;
@@ -320,7 +321,7 @@ $("#topWa").href = waLink("ສະບາຍດີ nnz ວິຕາມິນ ຂ�
 render();
 
 // ----- ໂຫຼດສິນຄ້າ: Google Sheet ກ່ອນ ຖ້າບໍ່ໄດ້ ໃຊ້ products.csv -----
-async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }
+async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.ok) throw new Error("HTTP "+r.status); const t = await r.text(); if(!/^\uFEFF?id,/.test(t)) throw new Error("not product csv"); return t; }
 (async () => {
   let text = "";
   try{ text = await load(CFG.sheetCsvUrl || "products.csv"); }

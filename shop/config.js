@@ -18,7 +18,7 @@ window.NNZ_CONFIG = {
   address: "ບ້ານຫ້ວຍຫົງ ຮ່ອມ 22/9 ເມືອງຈັນທະບູລີ ນະຄອນຫຼວງວຽງຈັນ",
 
   // ລິ້ງ Google Sheet ທີ່ "ເຜີຍແຜ່ເປັນ CSV" (ເບິ່ງຄູ່ມື ຂັ້ນ 3) · ປ່ອຍວ່າງ = ໃຊ້ໄຟລ໌ products.csv ໃນໂຟນເດີນີ້
-  sheetCsvUrl: "",
+  sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbmuHipwfnenuKapbiU2JdywWGnZ5_M7pRYDmJP13xl6Z7ISSon6NLpb_iFnE6Nwrc6jZ9DN1NWZ2g/pub?output=csv",
 
   // true = ສະແດງແຖບສີເຫຼືອງ "ແອັບຕົວຢ່າງ" · ປ່ຽນເປັນ false ເມື່ອສິນຄ້າ ລາຄາ ແລະ ເບີເປັນຂອງຈິງແລ້ວ
   sampleMode: false
