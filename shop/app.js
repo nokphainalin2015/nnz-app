@@ -116,7 +116,8 @@ const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${f
 
 let V = [];
 const vidsOf = id => V.filter(v=>(v.products||[]).includes(id)).sort((a,b)=>(b.n||0)-(a.n||0));
-const hasVid = id => V.some(v=>(v.products||[]).includes(id));
+const PRODUCT_VIDEOS = false; // ເຈົ້າຂອງຂໍປິດວິດີໂອໃນໜ້າສິນຄ້າໄວ້ກ່ອນ (2026-11-19) · ປ່ຽນເປັນ true ເພື່ອເປີດຄືນ
+const hasVid = id => PRODUCT_VIDEOS && V.some(v=>(v.products||[]).includes(id));
 const ACC = {nnz_vitaminofficial:"NNZ vitamin official", nnzvitamin2:"NNZ vitamin ຊ່ອງສຳຮອງ"};
 const ttUrl = v => `https://www.tiktok.com/@${v.acc}/video/${v.id}`;
 const vidCard = v => `<button class="vcard" data-vid="${esc(v.id)}" aria-label="ເບິ່ງວິດີໂອ ${esc(v.title||'NNZ')}">
@@ -261,7 +262,7 @@ function openProduct(id){
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">ຂວດແບ່ງ</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span></button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
-      ${(()=>{const vs=vidsOf(p.id); if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
+      ${(()=>{const vs=PRODUCT_VIDEOS?vidsOf(p.id):[]; if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
         return `<div class="pvid"><div class="sechead" style="margin:0"><h2 style="font-size:16px">ວິດີໂອສິນຄ້ານີ້</h2>${vs.length>1?`<button class="more" data-vnext>ຄລິບອື່ນ (${vi%vs.length+1}/${vs.length})</button>`:''}</div>
         <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=0&description=0&music_info=0" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
         <p class="note" style="margin:0">▶ ${esc(v.views||"")} ວິວ ໃນ TikTok · ${esc(ACC[v.acc]||"NNZ")}</p></div>`;})()}
