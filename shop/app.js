@@ -178,7 +178,7 @@ const cartTotal = () => cart.reduce((s,l)=>s+l.price*l.qty,0);
 function orderText(){
   const d = DELIVERY.find(x=>x.id===delivery) || DELIVERY[0];
   const lines = cart.map((l,i)=>`${i+1}. ${l.nm} (${l.opt}) x${l.qty} = ${kip(l.price*l.qty)}`).join("\n");
-  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\nລະຫັດອໍເດີ: ${orderCode}\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\nຈັດສົ່ງ: ${d.lb} (${d.sub})\n\nຊື່:\nເບີໂທ:\nທີ່ຢູ່ ຫຼື ສາຂາຂົນສົ່ງ:\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
+  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\nລະຫັດອໍເດີ: ${orderCode}\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\nຈັດສົ່ງ: ${d.lb} (${d.sub})\n${d.id==='rider'?'ທີ່ຢູ່ / ຈຸດສົ່ງ':'ສາຂາຂົນສົ່ງ ('+d.lb.replace('ຂົນສົ່ງ ','')+')'}: ${cust.place||''}\n\nຊື່: ${cust.name||''}\nເບີໂທ: ${cust.phone||''}\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
 }
 function renderCart(){
   if(!cart.length) return `<div class="wrap"><h2>ກະຕ່າ</h2><div class="empty"><b>ກະຕ່າຍັງວ່າງ</b><span>ເລືອກສິນຄ້າ ແລ້ວກົດ "ໃສ່ກະຕ່າ"</span><button class="cta" data-tab-go="home" style="flex:none">ເລືອກສິນຄ້າ</button></div></div>`;
@@ -188,6 +188,12 @@ function renderCart(){
       <div class="qty"><button data-dec="${i}" aria-label="ຫຼຸດ">−</button><span>${l.qty}</span><button data-inc="${i}" aria-label="ເພີ່ມ">+</button></div></div>`}).join("")}
     <div class="fieldset" role="radiogroup" aria-label="ວິທີຈັດສົ່ງ"><b>ວິທີຈັດສົ່ງ</b>
       ${DELIVERY.map(d=>`<label class="radio" for="dl-${d.id}"><input type="radio" id="dl-${d.id}" name="dl" value="${d.id}" ${delivery===d.id?'checked':''}><span>${d.lb}<small>${d.sub} · ແອັດມິນແຈ້ງຄ່າສົ່ງ</small></span></label>`).join("")}
+    </div>
+    <div class="fieldset"><b>${delivery==="rider"?"ສົ່ງໃຫ້ໃສ":"ຝາກສາຂາໃດ"}</b>
+      <label class="fld"><span>${delivery==="rider"?"ທີ່ຢູ່ ຫຼື ຈຸດສົ່ງ (ບ້ານ, ເມືອງ, ຈຸດສັງເກດ)":"ຊື່ສາຂາ "+(DELIVERY.find(x=>x.id===delivery)||{lb:""}).lb.replace("ຂົນສົ່ງ ","")+" ທີ່ຈະໄປຮັບເຄື່ອງ (ແຂວງ, ເມືອງ, ສາຂາ)"}</span>
+        <input class="inp" data-cust="place" value="${esc(cust.place||"")}" placeholder="${delivery==="rider"?"ເຊັ່ນ ບ້ານໂພນທັນ ເມືອງໄຊເສດຖາ ໃກ້ຕະຫຼາດ":"ເຊັ່ນ ສາຂາ ປາກເຊ ແຂວງຈຳປາສັກ"}" autocomplete="street-address"></label>
+      <label class="fld"><span>ຊື່ຜູ້ຮັບ</span><input class="inp" data-cust="name" value="${esc(cust.name||"")}" autocomplete="name"></label>
+      <label class="fld"><span>ເບີໂທຜູ້ຮັບ</span><input class="inp" data-cust="phone" value="${esc(cust.phone||"")}" inputmode="tel" autocomplete="tel" placeholder="020 xxxx xxxx"></label>
     </div>
     <div class="total"><span>ລວມຄ່າສິນຄ້າ</span><span class="num">${kip(cartTotal())}</span></div>
     <p class="note">ຍັງບໍ່ລວມຄ່າສົ່ງ · ແອັດມິນຈະແຈ້ງຄ່າສົ່ງໃນ WhatsApp</p>
@@ -228,6 +234,7 @@ function render(){
   document.querySelectorAll("nav.tabs button").forEach(b=>{ b.removeAttribute("aria-current"); if(b.dataset.tab===cur) b.setAttribute("aria-current","page"); });
   const n = cart.reduce((s,l)=>s+l.qty,0); const bd=$("#badge"); bd.hidden = !n; bd.textContent = n;
 }
+let cust = store("nnz-cust") || {name:"",phone:"",place:""};
 const newCode = () => "NNZ" + String(Math.floor(1000 + Math.random()*9000));
 let orderCode = store("nnz-oc") || newCode(); store("nnz-oc", orderCode);
 const save = () => { store("nnz-cart", cart); if(!cart.length){ orderCode = newCode(); store("nnz-oc", orderCode); } };
@@ -291,6 +298,12 @@ document.addEventListener("click", e => {
   const inc = e.target.closest("[data-inc]"); if(inc){ cart[+inc.dataset.inc].qty++; save(); render(); return; }
   const dec = e.target.closest("[data-dec]"); if(dec){ const i=+dec.dataset.dec; cart[i].qty--; if(cart[i].qty<1) cart.splice(i,1); save(); render(); return; }
   if(e.target.closest("#copyMsg")){ const ta=$("#msg"); const fb=()=>{ta.select();toast("ກົດຄ້າງແລ້ວເລືອກ ຄັດລອກ");}; try{ navigator.clipboard.writeText(ta.value).then(()=>toast("ຄັດລອກແລ້ວ"),fb); }catch(_){ fb(); } }
+});
+document.addEventListener("input", e => {
+  const k = e.target.dataset && e.target.dataset.cust; if(!k) return;
+  cust[k] = e.target.value; store("nnz-cust", cust);
+  const a = document.getElementById("sendWa"); if(a) a.href = waLink(orderText());
+  const m = document.getElementById("msg"); if(m) m.value = orderText();
 });
 document.addEventListener("change", e => { if(e.target.name==="dl"){ delivery=e.target.value; store("nnz-delivery",delivery); render(); }
   if(e.target.name==="py"){ pay=e.target.value; store("nnz-pay",pay); render(); } });
