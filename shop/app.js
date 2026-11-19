@@ -114,6 +114,34 @@ function list(){
 }
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
+let V = [];
+const ACC = {nnz_vitaminofficial:"NNZ vitamin official", nnzvitamin2:"NNZ vitamin ຊ່ອງສຳຮອງ"};
+const ttUrl = v => `https://www.tiktok.com/@${v.acc}/video/${v.id}`;
+const vidCard = v => `<button class="vcard" data-vid="${esc(v.id)}" aria-label="ເບິ່ງວິດີໂອ ${esc(v.title||'NNZ')}">
+  <div class="vthumb">${v.cover?`<img src="images/${esc(v.cover)}" alt="" loading="lazy">`:'<div class="vph">NNZ</div>'}
+    <span class="vplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+    <span class="vviews">▶ ${esc(v.views)}</span></div>
+  <span class="vtitle">${esc(v.title||'ວິດີໂອຈາກ NNZ')}</span></button>`;
+function openVideo(id){
+  const v = V.find(x=>x.id===id); if(!v) return;
+  const prods = (v.products||[]).map(pid=>P.find(p=>p.id===pid)).filter(Boolean);
+  const sh = document.createElement("div"); sh.className="sheet"; sh.setAttribute("role","dialog"); sh.setAttribute("aria-modal","true"); sh.setAttribute("aria-label","ວິດີໂອ");
+  sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
+    <button class="close" data-x>ປິດ</button>
+    <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=1&description=1&music_info=0" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
+    <p class="note" style="margin:0">${esc(ACC[v.acc]||'NNZ')} · ▶ ${esc(v.views)} ວິວ</p>
+    ${prods.map(p=>`<button class="clip" data-vprod="${esc(p.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="play" style="background:var(--brand,#e52535)">🛒</div><div><b style="font-size:14px">${esc(p.nm)}</b><div class="note">ເບິ່ງລາຄາ ແລະ ສັ່ງຊື້</div></div></button>`).join("")}
+    <a class="cta ghost" href="${esc(ttUrl(v))}" target="_blank" rel="noopener">ເປີດໃນແອັບ TikTok</a>
+  </div></div>`;
+  document.body.appendChild(sh); document.body.style.overflow="hidden";
+  const onKey = e => { if(e.key==="Escape") close(); };
+  const close = () => { sh.remove(); document.body.style.overflow=""; document.removeEventListener("keydown", onKey); };
+  document.addEventListener("keydown", onKey);
+  sh.addEventListener("click", e => {
+    if(e.target===sh || e.target.closest("[data-x]")) return close();
+    const o = e.target.closest("[data-vprod]"); if(o){ close(); openProduct(o.dataset.vprod); }
+  });
+}
 function renderHome(){
   if(loadErr) return `<div class="wrap"><div class="empty"><b>ໂຫຼດລາຍການສິນຄ້າບໍ່ໄດ້</b><span>${esc(loadErr)}</span><span>ຖາມແອັດມິນທາງ WhatsApp ໄດ້ເລີຍ</span></div></div>`;
   if(!P.length) return `<div class="wrap"><div class="empty"><b>ກຳລັງໂຫຼດສິນຄ້າ…</b></div></div>`;
@@ -126,6 +154,7 @@ function renderHome(){
       <div class="step"><i>1</i>ເລືອກສິນຄ້າ</div><div class="step"><i>2</i>ເລືອກຂວດເຕັມ ຫຼື ຂວດແບ່ງ</div><div class="step"><i>3</i>ໃສ່ກະຕ່າ</div><div class="step"><i>4</i>ສົ່ງອໍເດີທາງ WhatsApp</div>
     </div></section>
     <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
+    ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.slice(0,16).map(vidCard).join("")}</div></section>`:''}
     ${rowSec("ຂາຍດີ","best",best)}
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
@@ -223,6 +252,7 @@ function openProduct(id){
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">ຂວດແບ່ງ</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span></button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
+      ${V.filter(v=>(v.products||[]).includes(p.id)).slice(0,2).map(v=>`<button class="clip" data-pvid="${esc(v.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງວິດີໂອສິນຄ້ານີ້</b><div class="note">▶ ${esc(v.views)} ວິວ ໃນ TikTok</div></div></button>`).join("")}
       ${p.tiktok?`<a class="clip" href="${esc(p.tiktok)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງຄລິບຣີວິວ</b><div class="note">ເປີດໃນ TikTok</div></div></a>`:''}
       ${p.stock?`<div class="buyrow"><div class="qty"><button data-q="-1" aria-label="ຫຼຸດ">−</button><span>${qty}</span><button data-q="1" aria-label="ເພີ່ມ">+</button></div>
         <button class="cta" data-add>ໃສ່ກະຕ່າ · <span class="num">${kip(price*qty)}</span></button></div>`
@@ -238,6 +268,7 @@ function openProduct(id){
   sh.addEventListener("click", e => {
     if(e.target===sh || e.target.closest("[data-x]")) return close();
     const o = e.target.closest("[data-opt]"); if(o && !o.disabled){ opt=o.dataset.opt; draw(); return; }
+    const vb = e.target.closest("[data-pvid]"); if(vb){ close(); openVideo(vb.dataset.pvid); return; }
     const q = e.target.closest("[data-q]"); if(q){ qty=Math.max(1,Math.min(20,qty+ +q.dataset.q)); draw(); return; }
     if(e.target.closest("[data-add]")){
       const optLb = optLabel(opt), price = optPrice(opt);
@@ -253,6 +284,7 @@ document.addEventListener("click", e => {
   const t = e.target.closest("nav.tabs button"); if(t){ tab=t.dataset.tab; if(tab==="home"){filter=null;query="";$("#q").value="";} render(); window.scrollTo(0,0); return; }
   const g = e.target.closest("[data-tab-go]"); if(g){ tab=g.dataset.tabGo; render(); return; }
   const o = e.target.closest("[data-open]"); if(o){ openProduct(o.dataset.open); return; }
+  const vd = e.target.closest("[data-vid]"); if(vd){ openVideo(vd.dataset.vid); return; }
   const n = e.target.closest("[data-need]"); if(n){ filter = filter===n.dataset.need && tab==="all" ? null : n.dataset.need; tab="all"; render(); window.scrollTo(0,0); return; }
   if(e.target.closest("[data-more]")){ shown += 40; render(); return; }
   if(e.target.closest("[data-clear]")){ filter=null; query=""; $("#q").value=""; render(); return; }
@@ -277,6 +309,7 @@ async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.
   if(text){
     P = parseCSV(text).map(toProduct).filter(p=>p.full>0 || p.trials.length);
     P.sort((a,b)=>(b.photo?1:0)-(a.photo?1:0)); // ສິນຄ້າທີ່ມີຮູບແທ້ຂຶ້ນກ່ອນ
+    fetch("videos.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).then(j=>{ V=Array.isArray(j)?j:[]; render(); }).catch(()=>{});
     // ລາຄາໃນກະຕ່າເກົ່າ ໃຫ້ກົງກັບລາຄາລ່າສຸດ
     cart = cart.filter(l=>P.some(p=>p.id===l.id)).map(l=>{ const p=P.find(x=>x.id===l.id); const t=p.trials.find(t=>("ຂວດແບ່ງ "+t.qty).trim()===l.opt); return {...l, nm:p.nm, price: t? t.price : (p.full||l.price)}; });
     save();
