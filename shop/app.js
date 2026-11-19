@@ -102,7 +102,7 @@ function pic(p){
 }
 function card(p){
   return `<button class="card" data-open="${esc(p.id)}" aria-label="${esc(p.nm)}">
-    <div class="pic">${pic(p)}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':'')}${p.trial?'<span class="tag trial">ມີຂວດແບ່ງ</span>':''}</div>
+    <div class="pic">${pic(p)}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':'')}${p.trial?'<span class="tag trial">ມີຂວດແບ່ງ</span>':''}${hasVid(p.id)?'<span class="vbadge">▶ ມີວິດີໂອ</span>':''}</div>
     <div class="body"><div class="nm">${esc(p.nm)}</div><div class="meta">${esc(TYPE_LB[p.type]||"")}</div>
     <div class="pr">${p.full?`<b>${kip(p.full)}</b>`:`<b>${kip(p.trial.price)}</b>`}${p.was>p.full?`<s>${kip(p.was)}</s>`:''}${p.full&&p.trial?`<small>ແບ່ງລອງ ${kip(p.trial.price)}</small>`:(!p.full?'<small>ຂວດແບ່ງ</small>':'')}</div></div>
   </button>`;
@@ -115,6 +115,8 @@ function list(){
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
+const vidsOf = id => V.filter(v=>(v.products||[]).includes(id)).sort((a,b)=>(b.n||0)-(a.n||0));
+const hasVid = id => V.some(v=>(v.products||[]).includes(id));
 const ACC = {nnz_vitaminofficial:"NNZ vitamin official", nnzvitamin2:"NNZ vitamin ຊ່ອງສຳຮອງ"};
 const ttUrl = v => `https://www.tiktok.com/@${v.acc}/video/${v.id}`;
 const vidCard = v => `<button class="vcard" data-vid="${esc(v.id)}" aria-label="ເບິ່ງວິດີໂອ ${esc(v.title||'NNZ')}">
@@ -153,7 +155,7 @@ function renderHome(){
     <section aria-label="ວິທີສັ່ງ"><div class="steps">
       <div class="step"><i>1</i>ເລືອກສິນຄ້າ</div><div class="step"><i>2</i>ເລືອກຂວດເຕັມ ຫຼື ຂວດແບ່ງ</div><div class="step"><i>3</i>ໃສ່ກະຕ່າ</div><div class="step"><i>4</i>ສົ່ງອໍເດີທາງ WhatsApp</div>
     </div></section>
-    ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.slice(0,16).map(vidCard).join("")}</div></section>`:''}
+    ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
     <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
     ${rowSec("ຂາຍດີ","best",best)}
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
@@ -243,7 +245,7 @@ function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");
 
 function openProduct(id){
   const p = P.find(x=>x.id===id); if(!p) return;
-  let opt = p.full ? "full" : "t0", qty = 1;
+  let opt = p.full ? "full" : "t0", qty = 1, vi = 0;
   const optPrice = o => o==="full" ? p.full : p.trials[+o.slice(1)].price;
   const optLabel = o => o==="full" ? ("ຂວດເຕັມ "+p.size).trim() : ("ຂວດແບ່ງ "+p.trials[+o.slice(1)].qty).trim();
   const sh = document.createElement("div"); sh.className="sheet"; sh.setAttribute("role","dialog"); sh.setAttribute("aria-modal","true"); sh.setAttribute("aria-label",p.nm);
@@ -259,7 +261,10 @@ function openProduct(id){
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">ຂວດແບ່ງ</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span></button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
-      ${V.filter(v=>(v.products||[]).includes(p.id)).slice(0,2).map(v=>`<button class="clip" data-pvid="${esc(v.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງວິດີໂອສິນຄ້ານີ້</b><div class="note">▶ ${esc(v.views)} ວິວ ໃນ TikTok</div></div></button>`).join("")}
+      ${(()=>{const vs=vidsOf(p.id); if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
+        return `<div class="pvid"><div class="sechead" style="margin:0"><h2 style="font-size:16px">ວິດີໂອສິນຄ້ານີ້</h2>${vs.length>1?`<button class="more" data-vnext>ຄລິບອື່ນ (${vi%vs.length+1}/${vs.length})</button>`:''}</div>
+        <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=0&description=0&music_info=0" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
+        <p class="note" style="margin:0">▶ ${esc(v.views||"")} ວິວ ໃນ TikTok · ${esc(ACC[v.acc]||"NNZ")}</p></div>`;})()}
       ${p.tiktok?`<a class="clip" href="${esc(p.tiktok)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງຄລິບຣີວິວ</b><div class="note">ເປີດໃນ TikTok</div></div></a>`:''}
       ${p.stock?`<div class="buyrow"><div class="qty"><button data-q="-1" aria-label="ຫຼຸດ">−</button><span>${qty}</span><button data-q="1" aria-label="ເພີ່ມ">+</button></div>
         <button class="cta" data-add>ໃສ່ກະຕ່າ · <span class="num">${kip(price*qty)}</span></button></div>`
@@ -275,7 +280,7 @@ function openProduct(id){
   sh.addEventListener("click", e => {
     if(e.target===sh || e.target.closest("[data-x]")) return close();
     const o = e.target.closest("[data-opt]"); if(o && !o.disabled){ opt=o.dataset.opt; draw(); return; }
-    const vb = e.target.closest("[data-pvid]"); if(vb){ close(); openVideo(vb.dataset.pvid); return; }
+    if(e.target.closest("[data-vnext]")){ vi=(vi+1)%Math.max(1,vidsOf(p.id).length); draw(); return; }
     const q = e.target.closest("[data-q]"); if(q){ qty=Math.max(1,Math.min(20,qty+ +q.dataset.q)); draw(); return; }
     if(e.target.closest("[data-add]")){
       const optLb = optLabel(opt), price = optPrice(opt);
