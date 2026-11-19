@@ -149,7 +149,7 @@ const cartTotal = () => cart.reduce((s,l)=>s+l.price*l.qty,0);
 function orderText(){
   const d = DELIVERY.find(x=>x.id===delivery) || DELIVERY[0];
   const lines = cart.map((l,i)=>`${i+1}. ${l.nm} (${l.opt}) x${l.qty} = ${kip(l.price*l.qty)}`).join("\n");
-  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\nຈັດສົ່ງ: ${d.lb} (${d.sub})\n\nຊື່:\nເບີໂທ:\nທີ່ຢູ່ ຫຼື ສາຂາຂົນສົ່ງ:\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
+  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\nລະຫັດອໍເດີ: ${orderCode}\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\nຈັດສົ່ງ: ${d.lb} (${d.sub})\n\nຊື່:\nເບີໂທ:\nທີ່ຢູ່ ຫຼື ສາຂາຂົນສົ່ງ:\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
 }
 function renderCart(){
   if(!cart.length) return `<div class="wrap"><h2>ກະຕ່າ</h2><div class="empty"><b>ກະຕ່າຍັງວ່າງ</b><span>ເລືອກສິນຄ້າ ແລ້ວກົດ "ໃສ່ກະຕ່າ"</span><button class="cta" data-tab-go="home" style="flex:none">ເລືອກສິນຄ້າ</button></div></div>`;
@@ -167,11 +167,13 @@ function renderCart(){
       <label class="radio" for="py-cod"><input type="radio" id="py-cod" name="py" value="cod" ${pay==="cod"?'checked':''}><span>ເກັບເງິນປາຍທາງ (COD)<small>ຈ່າຍເມື່ອຮັບເຄື່ອງ</small></span></label>
     </div>
     ${pay==="qr"&&CFG.payQr?`<div class="payqr">
-      <p class="paystep"><b>1.</b> ໂອນຄ່າສິນຄ້າ <span class="num">${kip(cartTotal())}</span></p>
+      <p class="paystep"><b>1.</b> ໂອນຄ່າສິນຄ້າ <span class="num">${kip(cartTotal())}</span> ໃຫ້ກົງຍອດ</p>
+      <p class="paystep"><b>2.</b> ໃນຊ່ອງ <b>ໝາຍເຫດ / ເນື້ອໃນການໂອນ</b> ໃສ່ລະຫັດອໍເດີ <span class="ocode num">${esc(orderCode)}</span></p>
       <img src="${esc(CFG.payQr)}" alt="QR ຮັບເງິນ ${esc(CFG.payName||"")}" width="260" height="295">
       <p class="note">ຊື່ບັນຊີ: ${esc(CFG.payName||"")} · ກວດຊື່ໃຫ້ກົງກ່ອນໂອນ</p>
       <a class="cta ghost" href="${esc(CFG.payQr)}" download="nnz-QR.jpg">ບັນທຶກຮູບ QR ໄວ້ສະແກນໃນແອັບທະນາຄານ</a>
-      <p class="paystep"><b>2.</b> ກົດສົ່ງອໍເດີ ແລ້ວແນບຮູບສະລິບໃນ WhatsApp</p>
+      <p class="paystep"><b>3.</b> ກົດສົ່ງອໍເດີ ແລ້ວແນບຮູບສະລິບໃນ WhatsApp · ແອັດມິນກວດເງິນເຂົ້າບັນຊີແລ້ວຈຶ່ງສົ່ງເຄື່ອງ</p>
+      <div class="safe"><b>⚠ ກັນຖືກຫຼອກ</b><span>ຮ້ານຮັບເງິນເຂົ້າຊື່ <b>${esc(CFG.payName||"")}</b> ເທົ່ານັ້ນ. ແອັດມິນບໍ່ເຄີຍສົ່ງ QR ຫຼື ເລກບັນຊີອື່ນໃຫ້ໂອນ. ຖ້າມີຄົນຂໍໃຫ້ໂອນບ່ອນອື່ນ ໃຫ້ໂທຫາ ${esc(CFG.whatsappShow||"")} ກ່ອນ.</span></div>
     </div>`:''}
     <a class="cta wa" id="sendWa" href="${waLink(orderText())}" target="_blank" rel="noopener">ສົ່ງອໍເດີທາງ WhatsApp</a>
     <details><summary class="note">ຖ້າ WhatsApp ບໍ່ເປີດ ໃຫ້ຄັດລອກຂໍ້ຄວາມນີ້ໄປສົ່ງເອງ</summary>
@@ -182,6 +184,7 @@ function renderCart(){
 function renderContact(){
   return `<div class="wrap"><h2>ຕິດຕໍ່ຮ້ານ</h2><div class="contact">
     <div class="ccard"><b>WhatsApp</b><a class="num" href="https://wa.me/${esc(CFG.whatsapp||"")}" target="_blank" rel="noopener">${esc(CFG.whatsappShow||"")}</a>${CFG.whatsapp2?`<a class="num" href="https://wa.me/${esc(CFG.whatsapp2)}" target="_blank" rel="noopener">${esc(CFG.whatsappShow2||"")}</a>`:""}</div>
+    <div class="ccard safe"><b>⚠ ເບີ ແລະ ບັນຊີທາງການ</b><span>ຮ້ານມີເບີ WhatsApp 2 ເບີຂ້າງເທິງເທົ່ານັ້ນ · ຮັບເງິນເຂົ້າຊື່ ${esc(CFG.payName||"")} ເທົ່ານັ້ນ · ຮ້ານບໍ່ເຄີຍຂໍລະຫັດ OTP ຫຼື ລະຫັດຜ່ານ</span></div>
     <div class="ccard"><b>ໜ້າຮ້ານ</b><span>${esc(CFG.address||"")}</span></div>
     <div class="ccard"><b>ຈັດສົ່ງ</b><span>ໄຣເດີສົ່ງພາຍໃນມື້ໃນນະຄອນຫຼວງວຽງຈັນ · ຕ່າງແຂວງຝາກ ຮຸ່ງອາລຸນ · ອານຸສິດ · ມີໄຊ</span></div>
     <div class="ccard"><b>ຂາຍຍ່ອຍເທົ່ານັ້ນ</b><span>ຮ້ານດູແລສິນຄ້າເອງທຸກຂວດ ເພື່ອໃຫ້ລູກຄ້າໄດ້ຂອງແທ້</span></div>
@@ -196,7 +199,9 @@ function render(){
   document.querySelectorAll("nav.tabs button").forEach(b=>{ b.removeAttribute("aria-current"); if(b.dataset.tab===cur) b.setAttribute("aria-current","page"); });
   const n = cart.reduce((s,l)=>s+l.qty,0); const bd=$("#badge"); bd.hidden = !n; bd.textContent = n;
 }
-const save = () => store("nnz-cart", cart);
+const newCode = () => "NNZ" + String(Math.floor(1000 + Math.random()*9000));
+let orderCode = store("nnz-oc") || newCode(); store("nnz-oc", orderCode);
+const save = () => { store("nnz-cart", cart); if(!cart.length){ orderCode = newCode(); store("nnz-oc", orderCode); } };
 let toastT;
 function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el);} el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
