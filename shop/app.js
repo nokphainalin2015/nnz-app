@@ -245,6 +245,15 @@ const save = () => { store("nnz-cart", cart); if(!cart.length){ orderCode = newC
 let toastT;
 function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el);} el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
+function openZoom(src, title){
+  const z=document.createElement("div"); z.className="zoomv"; z.setAttribute("role","dialog"); z.setAttribute("aria-modal","true"); z.setAttribute("aria-label",title||"ຮູບ");
+  z.innerHTML=`<div class="zbar"><span>ແຕະຮູບ = ຂະຫຍາຍ/ຫຍໍ້ · ໃຊ້ 2 ນິ້ວຊູມໄດ້</span><button data-zx>ປິດ</button></div><div class="zbox"><img src="${esc(src)}" alt="${esc(title||"")}"></div>`;
+  document.body.appendChild(z);
+  const onKey=e=>{ if(e.key==="Escape") close(); };
+  const close=()=>{ z.remove(); document.removeEventListener("keydown",onKey); };
+  document.addEventListener("keydown",onKey);
+  z.addEventListener("click",e=>{ e.stopPropagation(); if(e.target.closest("[data-zx]")) return close(); if(e.target.tagName==="IMG"){ const box=z.querySelector(".zbox"); const r=e.target.getBoundingClientRect(); const fx=(e.clientX-r.left)/r.width, fy=(e.clientY-r.top)/r.height; z.classList.toggle("big"); if(z.classList.contains("big")) requestAnimationFrame(()=>{ box.scrollLeft=fx*e.target.offsetWidth-box.clientWidth/2; box.scrollTop=fy*e.target.offsetHeight-box.clientHeight/2; }); } });
+}
 function openProduct(id){
   const p = P.find(x=>x.id===id); if(!p) return;
   let opt = p.full ? "full" : "t0", qty = 1, vi = 0;
@@ -255,7 +264,7 @@ function openProduct(id){
     const price = optPrice(opt);
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
-      <div class="hero">${pic(p)}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
+      <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${pic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
       <div><h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
@@ -281,6 +290,7 @@ function openProduct(id){
   document.addEventListener("keydown", onKey);
   sh.addEventListener("click", e => {
     if(e.target===sh || e.target.closest("[data-x]")) return close();
+    if(e.target.closest("[data-zoom]")){ const im=sh.querySelector(".hero img"); if(im) openZoom(im.src, p.nm); return; }
     const o = e.target.closest("[data-opt]"); if(o && !o.disabled){ opt=o.dataset.opt; draw(); return; }
     if(e.target.closest("[data-vnext]")){ vi=(vi+1)%Math.max(1,vidsOf(p.id).length); draw(); return; }
     const q = e.target.closest("[data-q]"); if(q){ qty=Math.max(1,Math.min(20,qty+ +q.dataset.q)); draw(); return; }
