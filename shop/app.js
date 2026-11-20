@@ -83,7 +83,7 @@ function mergeVariants(rows){
   });
   return out.map(x => {
     if(!Array.isArray(x)) return x;
-    if(x.length===1) return x[0].r;
+    if(x.length===1 && !x[0].ml) return x[0].r; // ແຖວແບ່ງດ່ຽວ (ບໍ່ມີຂວດເຕັມ) ຕ້ອງສະແດງເປັນຂວດແບ່ງ ບໍ່ແມ່ນລາຄາຂວດເຕັມ
     const main = x.find(v=>!v.ml);
     const base = {...(main ? main.r : x[0].r)};
     const splits = x.filter(v=>v.ml && num(v.r.price_full)>0 && (v.r.in_stock==="" || yes(v.r.in_stock))).sort((a,b)=>parseFloat(b.ml)-parseFloat(a.ml));
