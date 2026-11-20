@@ -245,6 +245,11 @@ const save = () => { store("nnz-cart", cart); if(!cart.length){ orderCode = newC
 let toastT;
 function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el);} el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
+function heroPic(p){
+  const m = /^p\/(fb_\d{4}\.jpg)$/.exec(p.photo||"");
+  if(!m) return pic(p);
+  return `<img src="images/hd/${m[1]}" alt="${esc(p.nm)}" onerror="this.onerror=null;this.src='images/${esc(p.photo)}'" style="width:100%;height:100%;object-fit:contain;display:block">`;
+}
 function openZoom(src, title){
   const z=document.createElement("div"); z.className="zoomv"; z.setAttribute("role","dialog"); z.setAttribute("aria-modal","true"); z.setAttribute("aria-label",title||"ຮູບ");
   z.innerHTML=`<div class="zbar"><span>ແຕະຮູບ = ຂະຫຍາຍ/ຫຍໍ້ · ໃຊ້ 2 ນິ້ວຊູມໄດ້</span><button data-zx>ປິດ</button></div><div class="zbox"><img src="${esc(src)}" alt="${esc(title||"")}"></div>`;
@@ -264,7 +269,7 @@ function openProduct(id){
     const price = optPrice(opt);
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
-      <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${pic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
+      <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${heroPic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
       <div><h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
