@@ -48,22 +48,52 @@ function parseCSV(text){
 const yes = v => /^(yes|y|1|true|ມີ|ແມ່ນ)$/i.test(String(v).trim());
 const num = v => Number(String(v).replace(/[^\d.]/g,"")) || 0;
 function hueOf(s){ let h=0; for(const ch of String(s)) h=(h*31+ch.charCodeAt(0))%360; return h; }
+// ຊື່ຫຍໍ້ຍີ່ຫໍ້ທີ່ທີມໃຊ້ໃນ Pancake → ຊື່ເຕັມໃຫ້ລູກຄ້າອ່ານ (ຄົ້ນຫາໄດ້ທັງ 2 ແບບ)
+const BRANDS = {hc:"Healthy Care", ntbt:"Nature's Bounty", bm:"Blackmores", ntw:"Nature's Way", ntm:"Nature Made", kl:"Kirkland", lsp:"Life Space", spl:"Springleaf", sw:"Swisse"};
+const fullBrand = s => String(s).replace(/(^|[\s(\/])(hc|ntbt|bm|ntw|ntm|kl|lsp|spl)(?=[\s)\/.,]|$)/gi, (a,pre,b)=>pre+BRANDS[b.toLowerCase()]);
 function toProduct(r, i){
   const id = r.id || String(i+1);
   const tsz = (r.trial_size||"").split("|"), tpr = (r.trial_price||"").split("|");
   const trials = tpr.map((pr,k)=>({qty:(tsz[k]||"").trim(), price:num(pr)})).filter(t=>t.price>0);
-  const type = (r.type||"supplement").trim().toLowerCase();
+  let type = (r.type||"supplement").trim().toLowerCase();
+  if(type!=="perfume" && /ນ້ຳຫອມ|\bED[PT]\b|parfum|cologne|club de nuit/i.test(r.name_lo||"")) type = "perfume";
   const tags = (r.category||"").split(/[|,]/).map(s=>s.trim().toLowerCase()).filter(Boolean)
     .concat(yes(r.best_seller)?["best"]:[], yes(r.new)?["new"]:[], yes(r.sale)?["sale"]:[], ["t:"+type]);
-  const nm = r.name_lo || r.name_en || "—";
+  const raw = r.name_lo || r.name_en || "—", nm = fullBrand(raw);
   return {
-    id, nm, en:r.name_en || "", size:r.size || "", brand:r.brand || "", type, tags,
+    id, nm, en:r.name_en || "", size:r.size || "", brand:fullBrand(r.brand || ""), type, tags,
     full:num(r.price_full), was:num(r.price_old)||0,
     trials, trial: trials[0] || null,
     stock: r.in_stock==="" ? true : yes(r.in_stock),
     photo: r.photo || "", tiktok: r.tiktok || "", hue: hueOf(r.brand||nm),
-    find: (nm+" "+(r.name_en||"")+" "+(r.search||"")).toLowerCase()
+    find: (nm+" "+raw+" "+(r.name_en||"")+" "+(r.search||"")).toLowerCase()
   };
+}
+
+// ລວມນ້ຳຫອມຂະໜາດຕ່າງໆ (ລະຫັດ A134ກ່ອງໃຫຍ່ / A134ແບ່ງ5ML ...) ເປັນສິນຄ້າດຽວ ເພາະ Pancake ແຍກເປັນຫຼາຍລາຍການ
+const VAR_RX = /^(.+?)\s*(ກ່ອງໃຫຍ່|ແບ່ງ\s*([\d.]+)\s*ML)\s*$/i;
+function mergeVariants(rows){
+  const groups = new Map(), out = [];
+  rows.forEach(r => {
+    const m = VAR_RX.exec((r.code||"").trim());
+    if(!m){ out.push(r); return; }
+    const key = m[1].trim()+"|"+(r.name_lo||"").trim().toLowerCase();
+    if(!groups.has(key)){ groups.set(key, []); out.push(groups.get(key)); }
+    groups.get(key).push({r, ml: m[3] ? m[3]+"ml" : ""});
+  });
+  return out.map(x => {
+    if(!Array.isArray(x)) return x;
+    if(x.length===1) return x[0].r;
+    const main = x.find(v=>!v.ml);
+    const base = {...(main ? main.r : x[0].r)};
+    const splits = x.filter(v=>v.ml && num(v.r.price_full)>0 && (v.r.in_stock==="" || yes(v.r.in_stock))).sort((a,b)=>parseFloat(b.ml)-parseFloat(a.ml));
+    if(!main){ base.price_full = ""; base.price_old = ""; }
+    base.trial_size = splits.map(v=>v.ml).join("|");
+    base.trial_price = splits.map(v=>v.r.price_full).join("|");
+    base.photo = (main && main.r.photo) || (x.find(v=>v.r.photo)||{r:{}}).r.photo || "";
+    base.in_stock = x.some(v=>v.r.in_stock==="" || yes(v.r.in_stock)) ? "yes" : "no";
+    return base;
+  });
 }
 
 let shown = 40;
@@ -246,7 +276,7 @@ let toastT;
 function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el);} el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
 function heroPic(p){
-  const m = /^p\/(fb_\d{4}\.jpg)$/.exec(p.photo||"");
+  const m = /^p\/((?:fb|p2)_\d{4}\.jpg|pf_\d{2}\.jpg)$/.exec(p.photo||"");
   if(!m) return pic(p);
   return `<img src="images/hd/${m[1]}" alt="${esc(p.nm)}" onerror="this.onerror=null;this.src='images/${esc(p.photo)}'" style="width:100%;height:100%;object-fit:contain;display:block">`;
 }
@@ -342,7 +372,7 @@ async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.
   try{ text = await load(CFG.sheetCsvUrl || "products.csv"); }
   catch(e){ try{ if(CFG.sheetCsvUrl) text = await load("products.csv"); else throw e; }catch(e2){ loadErr = "ກວດອິນເຕີເນັດ ແລ້ວລອງເປີດໃໝ່"; } }
   if(text){
-    P = parseCSV(text).map(toProduct).filter(p=>p.full>0 || p.trials.length);
+    P = mergeVariants(parseCSV(text)).map(toProduct).filter(p=>p.full>0 || p.trials.length);
     P.sort((a,b)=>(b.photo?1:0)-(a.photo?1:0)); // ສິນຄ້າທີ່ມີຮູບແທ້ຂຶ້ນກ່ອນ
     fetch("videos.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(j=>{ V=Array.isArray(j)?j:[]; render(); }).catch(()=>{});
     // ລາຄາໃນກະຕ່າເກົ່າ ໃຫ້ກົງກັບລາຄາລ່າສຸດ
