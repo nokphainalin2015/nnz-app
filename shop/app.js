@@ -372,7 +372,7 @@ async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.
   try{ text = await load(CFG.sheetCsvUrl || "products.csv"); }
   catch(e){ try{ if(CFG.sheetCsvUrl) text = await load("products.csv"); else throw e; }catch(e2){ loadErr = "ກວດອິນເຕີເນັດ ແລ້ວລອງເປີດໃໝ່"; } }
   if(text){
-    P = mergeVariants(parseCSV(text)).map(toProduct).filter(p=>p.full>0 || p.trials.length);
+    P = mergeVariants(parseCSV(text).filter(r=>!/ກົ້ນຂວດ/.test(r.name_lo||""))).map(toProduct).filter(p=>p.full>0 || p.trials.length); // ນ້ຳຫອມກົ້ນຂວດ ມີຢ່າງລະຂວດ ບໍ່ສະແດງໃນແອັບ
     P.sort((a,b)=>(b.photo?1:0)-(a.photo?1:0)); // ສິນຄ້າທີ່ມີຮູບແທ້ຂຶ້ນກ່ອນ
     fetch("videos.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(j=>{ V=Array.isArray(j)?j:[]; render(); }).catch(()=>{});
     // ລາຄາໃນກະຕ່າເກົ່າ ໃຫ້ກົງກັບລາຄາລ່າສຸດ
