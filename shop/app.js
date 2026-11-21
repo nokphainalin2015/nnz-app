@@ -241,7 +241,7 @@ function renderHome(){
   const trial = pick(p=>p.trial && p.type==="supplement"), perf = pick(p=>p.type==="perfume" && p.trial), beauty = pick(p=>p.type==="beauty");
   const rowSec = (title, need, arr, note="") => arr.length ? `<section><div class="sechead"><h2>${title}</h2><button class="more" data-need="${need}">ເບິ່ງທັງໝົດ</button></div>${note}<div class="row">${arr.map(card).join("")}</div></section>` : "";
   return `<div class="wrap">
-    <section><div class="sechead"><h2>ໝວດສິນຄ້າຍອດນິຍົມ</h2></div><div class="ccards">${CATS.map(catCard).join("")}</div></section>
+    <section><div class="sechead"><h2>ໝວດສິນຄ້າຍອດນິຍົມ</h2></div><div class="ccards">${CATS.map(catCard).join("")}</div><div class="cdots" aria-hidden="true"></div></section>
     <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
     ${rowSec("🔥 ສິນຄ້າຂາຍດີ ທີ່ລູກຄ້າສັ່ງຫຼາຍທີ່ສຸດ","best",best,'<p class="note" style="margin:-4px 0 10px">ຈັດອັນດັບຈາກຍອດສັ່ງຊື້ຈິງຂອງຮ້ານ · ລູກຄ້າເລືອກຊື້ຊ້ຳຫຼາຍທີ່ສຸດ</p>')}
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
@@ -346,6 +346,28 @@ function render(){
   const cur = tab==="home"&&(query||filter) ? "all" : tab;
   document.querySelectorAll("nav.tabs button").forEach(b=>{ b.removeAttribute("aria-current"); if(b.dataset.tab===cur) b.setAttribute("aria-current","page"); });
   const n = cart.reduce((s,l)=>s+l.qty,0); const bd=$("#badge"); bd.hidden = !n; bd.textContent = n;
+  initCats();
+}
+// ໝວດສິນຄ້າຍອດນິຍົມ: ປັດໄດ້ ມີຈຸດບອກໜ້າ ແລະ ເລື່ອນເອງທຸກ 3.5 ວິ (ຢຸດເມື່ອລູກຄ້າແຕະ)
+let catTimer = null;
+function initCats(){
+  clearInterval(catTimer);
+  const box = $(".ccards"), dw = $(".cdots"); if(!box || !dw) return;
+  const cards = [...box.children], max = Math.max(0, box.scrollWidth - box.clientWidth);
+  const pos = [...new Set(cards.map(c => Math.min(c.offsetLeft - cards[0].offsetLeft, max)))]; // ຈຸດທີ່ເລື່ອນໄປຮອດໄດ້ແທ້
+  dw.innerHTML = pos.length > 1 ? pos.map((_,k)=>`<i${k?"":' class="on"'}></i>`).join("") : "";
+  const dots = [...dw.children]; if(dots.length < 2) return;
+  const idx = () => pos.reduce((best,p,k)=> Math.abs(p-box.scrollLeft) < Math.abs(pos[best]-box.scrollLeft) ? k : best, 0);
+  const mark = () => { const i = idx(); dots.forEach((d,k)=>d.classList.toggle("on", k===i)); };
+  let touched = 0;
+  box.addEventListener("scroll", mark, {passive:true});
+  ["touchstart","pointerdown","wheel"].forEach(ev=>box.addEventListener(ev, ()=>{ touched = Date.now(); }, {passive:true}));
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  catTimer = setInterval(()=>{
+    if(!document.body.contains(box)) return clearInterval(catTimer);
+    if(Date.now()-touched < 6000 || document.hidden) return;
+    const i = idx(); box.scrollTo({left: pos[i >= pos.length-1 ? 0 : i+1], behavior:"smooth"});
+  }, 3500);
 }
 let cust = store("nnz-cust") || {name:"",phone:"",place:""};
 const newCode = () => "NNZ" + String(Math.floor(1000 + Math.random()*9000));
