@@ -77,6 +77,9 @@ function toProduct(r, i){
   if(type!=="perfume" && /ນ້ຳຫອມ|\bED[PT]\b|parfum|cologne|club de nuit/i.test(r.name_lo||"")) type = "perfume";
   const tags = (r.category||"").split(/[|,]/).map(s=>s.trim().toLowerCase()).filter(Boolean)
     .concat(brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))?["b:"+brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))]:[], (yes(r.best_seller)||(CFG.bestSellers||[]).includes(r.id||String(i+1)))?["best"]:[], yes(r.new)?["new"]:[], (yes(r.sale)||PROMO_RX.test(r.name_lo||""))?["sale"]:[], ["t:"+type]);
+  // 4 ໝວດໃຫຍ່ (ແບບ Chemist): ນ້ຳຫອມ / ແມ່ ແລະ ເດັກ / ຄວາມງາມ / ວິຕາມິນ
+  const grp = type==="perfume" ? "perfume" : (tags.includes("kids") || MOM_RX.test((r.name_lo||"")+" "+(r.name_en||""))) ? "mom" : type==="beauty" ? "beauty" : "vit";
+  tags.push("g:"+grp);
   const raw = r.name_lo || r.name_en || "—", nm = fullBrand(raw);
   return {
     id, rank:(CFG.bestSellers||[]).indexOf(id)+1, nm, en:r.name_en || "", size:r.size || "", brand:fullBrand(r.brand || ""), type, tags,
@@ -194,6 +197,9 @@ function needCards(){
     return `<button class="ncard" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${c}"><span class="nimg">${p?pic(p):`<span class="nph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>`}</span><span class="nlab">${n.lb}</span></button>`;
   }).join("");
 }
+const MOM_RX = /pediasure|aptamil|alula|elevit|menevit|natalis|pregnan|breastfeed|infant|\bbaby|\bkids?\b|ເດັກ|critters|bio ?island|pentavite|teen|ນົມເດັກ/i;
+const CATS = [{id:"g:vit",lb:"ວິຕາມິນ ແລະ ອາຫານເສີມ",img:"cat/cat_vit.jpg"},{id:"g:beauty",lb:"ຄວາມງາມ ແລະ ເຄື່ອງສຳອາງ",img:"cat/cat_beauty.jpg"},{id:"g:mom",lb:"ສິນຄ້າແມ່ ແລະ ເດັກ",img:"cat/cat_mom.jpg"},{id:"g:perfume",lb:"ນ້ຳຫອມ",img:"cat/cat_perfume.jpg"}];
+const catCard = c => `<button class="ccard" data-need="${c.id}" aria-pressed="${filter===c.id}"><img src="images/${c.img}" alt="${c.lb}" loading="lazy"><span class="clab">${c.lb}</span></button>`;
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${NEED_COLOR[n.id]||"#e52535"};--cb:${(NEED_COLOR[n.id]||"#e52535")}30;--cb2:${(NEED_COLOR[n.id]||"#e52535")}0d"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
@@ -241,7 +247,7 @@ function renderHome(){
     ${rowSec("🔥 ສິນຄ້າຂາຍດີ ທີ່ລູກຄ້າສັ່ງຫຼາຍທີ່ສຸດ","best",best,'<p class="note" style="margin:-4px 0 10px">ຈັດອັນດັບຈາກຍອດສັ່ງຊື້ຈິງຂອງຮ້ານ · ລູກຄ້າເລືອກຊື້ຊ້ຳຫຼາຍທີ່ສຸດ</p>')}
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
-    <section><div class="sechead"><h2>ເລືອກຕາມໝວດ</h2></div><div class="ncards">${needCards()}</div></section>
+    <section><div class="sechead"><h2>ໝວດສິນຄ້າຍອດນິຍົມ</h2></div><div class="ccards">${CATS.map(catCard).join("")}</div></section>
     <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
@@ -253,7 +259,7 @@ function renderHome(){
 }
 function renderAll(){
   const items = list();
-  const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ສິນຄ້າໂປຣໂມຊັ່ນ"}[filter] || "")) : "ສິນຄ້າທັງໝົດ";
+  const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ສິນຄ້າໂປຣໂມຊັ່ນ"}[filter] || (CATS.find(c=>c.id===filter)||{}).lb || "")) : "ສິນຄ້າທັງໝົດ";
   return `<div class="wrap">
     <div class="sechead"><h2>${esc(query?`ຜົນຄົ້ນຫາ "${query}"`:nm)}</h2>${filter||query?'<button class="more" data-clear>ລ້າງຕົວກອງ</button>':''}</div>
     ${filter&&filter.startsWith("b:")?`<button class="cta ghost" type="button" id="pickBrand" style="height:40px;font-size:14px">ເລືອກຍີ່ຫໍ້ອື່ນ ▾</button>`:`<div class="needs">${NEEDS.map(needBtn).join("")}</div>`}

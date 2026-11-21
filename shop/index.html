@@ -121,6 +121,13 @@ h2{font-size:17px;font-weight:800;margin:0;text-wrap:balance}
 .need[aria-pressed="true"]{background:var(--c);color:#fff}
 .need[aria-pressed="true"] .dot{background:#fff}
 .need[aria-pressed="true"] .dot svg{color:var(--c)}
+.ccards{display:grid;grid-auto-flow:column;grid-auto-columns:calc(50% - 5px);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding:2px 4px 6px;scrollbar-width:none}
+.ccards::-webkit-scrollbar{display:none}
+.ccard{display:flex;flex-direction:column;border:0;padding:0 !important;border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;scroll-snap-align:start;text-align:left}
+.ccard img{display:block;width:100%;aspect-ratio:600/430;object-fit:cover}
+.ccard .clab{position:relative;display:flex;align-items:center;min-height:40px;padding:6px 10px 6px 22px;background:var(--brand);color:#fff;font:800 13px/1.2 var(--f-text)}
+.ccard .clab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:14px;background:var(--leaf);clip-path:polygon(0 0,55% 0,100% 50%,55% 100%,0 100%)}
+.ccard[aria-pressed="true"]{outline:3px solid var(--brand);outline-offset:-3px}
 .ncards{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding:2px 4px 6px;scrollbar-width:none}
 .ncards::-webkit-scrollbar{display:none}
 .ncard{flex:0 0 100px;display:flex;flex-direction:column;border:0;padding:0;border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;scroll-snap-align:start;text-align:left}
@@ -283,7 +290,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 </div></nav>
 
 
-<script src="config.js?v=202611211930"></script>
-<script src="app.js?v=202611211930"></script>
+<script src="config.js?v=202611212000"></script>
+<script src="app.js?v=202611212000"></script>
 </body>
 </html>
