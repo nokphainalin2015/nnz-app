@@ -382,6 +382,7 @@ function openProduct(id){
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
       <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${heroPic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
+      <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><span><i>1</i>ເລືອກຂວດເຕັມ<br>ຫຼື ຂວດແບ່ງ</span><span><i>2</i>ເລືອກ<br>ຈຳນວນ</span><span><i>3</i>ກົດ<br>ໃສ່ກະຕ່າ</span><span><i>4</i>ສົ່ງອໍເດີ<br>ທາງ WhatsApp</span></div>
       <div>${p.promoLabel?`<span class="rankline" style="background:#e52535;color:#fff;margin-right:4px">🎁 ${esc(p.promoLabel)}</span>`:''}${p.rank?`<span class="rankline">🔥 ສິນຄ້າຂາຍດີອັນດັບ ${p.rank} ຂອງຮ້ານ</span>`:''}<h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
