@@ -241,14 +241,14 @@ function renderHome(){
   const trial = pick(p=>p.trial && p.type==="supplement"), perf = pick(p=>p.type==="perfume" && p.trial), beauty = pick(p=>p.type==="beauty");
   const rowSec = (title, need, arr, note="") => arr.length ? `<section><div class="sechead"><h2>${title}</h2><button class="more" data-need="${need}">ເບິ່ງທັງໝົດ</button></div>${note}<div class="row">${arr.map(card).join("")}</div></section>` : "";
   return `<div class="wrap">
-    <section aria-label="ວິທີສັ່ງ"><div class="steps">
-      <div class="step"><i>1</i>ເລືອກສິນຄ້າ</div><div class="step"><i>2</i>ເລືອກຂວດເຕັມ ຫຼື ຂວດແບ່ງ</div><div class="step"><i>3</i>ໃສ່ກະຕ່າ</div><div class="step"><i>4</i>ສົ່ງອໍເດີທາງ WhatsApp</div>
-    </div></section>
+    <section><div class="sechead"><h2>ໝວດສິນຄ້າຍອດນິຍົມ</h2></div><div class="ccards">${CATS.map(catCard).join("")}</div></section>
+    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
     ${rowSec("🔥 ສິນຄ້າຂາຍດີ ທີ່ລູກຄ້າສັ່ງຫຼາຍທີ່ສຸດ","best",best,'<p class="note" style="margin:-4px 0 10px">ຈັດອັນດັບຈາກຍອດສັ່ງຊື້ຈິງຂອງຮ້ານ · ລູກຄ້າເລືອກຊື້ຊ້ຳຫຼາຍທີ່ສຸດ</p>')}
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
-    <section><div class="sechead"><h2>ໝວດສິນຄ້າຍອດນິຍົມ</h2></div><div class="ccards">${CATS.map(catCard).join("")}</div></section>
-    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
+    <section aria-label="ວິທີສັ່ງ"><div class="steps">
+      <div class="step"><i>1</i>ເລືອກສິນຄ້າ</div><div class="step"><i>2</i>ເລືອກຂວດເຕັມ ຫຼື ຂວດແບ່ງ</div><div class="step"><i>3</i>ໃສ່ກະຕ່າ</div><div class="step"><i>4</i>ສົ່ງອໍເດີທາງ WhatsApp</div>
+    </div></section>
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
