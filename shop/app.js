@@ -75,7 +75,7 @@ function toProduct(r, i){
 }
 
 // ລວມນ້ຳຫອມຂະໜາດຕ່າງໆ (ລະຫັດ A134ກ່ອງໃຫຍ່ / A134ແບ່ງ5ML ...) ເປັນສິນຄ້າດຽວ ເພາະ Pancake ແຍກເປັນຫຼາຍລາຍການ
-const VAR_RX = /^(.+?)\s*(ກ່ອງໃຫຍ່|ແບ່ງ\s*([\d.]+)\s*ML)\s*$/i;
+const VAR_RX = /^(.+?)\s*(ກ່ອງໃຫຍ່|ແບ່ງ\s*([\d.]+)\s*(ML|ແຜ່ນ))\s*$/i;
 function mergeVariants(rows){
   const groups = new Map(), out = [];
   rows.forEach(r => {
@@ -83,7 +83,7 @@ function mergeVariants(rows){
     if(!m){ out.push(r); return; }
     const key = m[1].trim()+"|"+(r.name_lo||"").trim().toLowerCase();
     if(!groups.has(key)){ groups.set(key, []); out.push(groups.get(key)); }
-    groups.get(key).push({r, ml: m[3] ? m[3]+"ml" : ""});
+    groups.get(key).push({r, ml: m[3] ? m[3]+(/ແຜ່ນ/.test(m[4]||"")?" ແຜ່ນ":"ml") : ""});
   });
   return out.map(x => {
     if(!Array.isArray(x)) return x;
@@ -137,9 +137,9 @@ function pic(p){
 }
 function card(p){
   return `<button class="card" data-open="${esc(p.id)}" aria-label="${esc(p.nm)}">
-    <div class="pic">${pic(p)}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':'')}${p.trial?'<span class="tag trial">ມີຂວດແບ່ງ</span>':''}${hasVid(p.id)?'<span class="vbadge">▶ ມີວິດີໂອ</span>':''}</div>
+    <div class="pic">${pic(p)}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':'')}${p.trial?`<span class="tag trial">${/ແຜ່ນ/.test(p.trial.qty)?'ແຍກແຜ່ນໄດ້':'ມີຂວດແບ່ງ'}</span>`:''}${hasVid(p.id)?'<span class="vbadge">▶ ມີວິດີໂອ</span>':''}</div>
     <div class="body"><div class="nm">${esc(p.nm)}</div><div class="meta">${esc(TYPE_LB[p.type]||"")}</div>
-    <div class="pr">${p.full?`<b>${kip(p.full)}</b>`:`<b>${kip(p.trial.price)}</b>`}${p.was>p.full?`<s>${kip(p.was)}</s>`:''}${p.full&&p.trial?`<small>ແບ່ງລອງ ${kip(p.trial.price)}</small>`:(!p.full?'<small>ຂວດແບ່ງ</small>':'')}</div></div>
+    <div class="pr">${p.full?`<b>${kip(p.full)}</b>`:`<b>${kip(p.trial.price)}</b>`}${p.was>p.full?`<s>${kip(p.was)}</s>`:''}${p.full&&p.trial?`<small>${/ແຜ່ນ/.test(p.trial.qty)?'ແຜ່ນລະ':'ແບ່ງລອງ'} ${kip(p.trial.price)}</small>`:(!p.full?'<small>ຂວດແບ່ງ</small>':'')}</div></div>
   </button>`;
 }
 function list(){
@@ -202,6 +202,7 @@ function renderHome(){
     ${rowSec("ລາຄາພິເສດ","sale",sale)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
     ${rowSec("ຄວາມງາມ","t:beauty",beauty)}
+    ${CFG.mapUrl?`<a class="mapbar" href="${esc(CFG.mapUrl)}" target="_blank" rel="noopener"><span>📍</span><span><b>ໜ້າຮ້ານ nnz ວິຕາມິນ</b><small>${esc(CFG.address||"")}</small></span><span class="go">ນຳທາງ ›</span></a>`:""}
     <p class="note" style="text-align:center">ສິນຄ້າທັງໝົດ <span class="num">${P.length.toLocaleString("en-US")}</span> ລາຍການ · ຄົ້ນຫາດ້ວຍຊື່ ຫຼື ຍີ່ຫໍ້ໄດ້ທາງເທິງ</p>
   </div>`;
 }
@@ -277,7 +278,7 @@ function renderContact(){
   return `<div class="wrap"><h2>ຕິດຕໍ່ຮ້ານ</h2><div class="contact">
     <div class="ccard"><b>WhatsApp</b><a class="num" href="https://wa.me/${esc(CFG.whatsapp||"")}" target="_blank" rel="noopener">${esc(CFG.whatsappShow||"")}</a>${CFG.whatsapp2?`<a class="num" href="https://wa.me/${esc(CFG.whatsapp2)}" target="_blank" rel="noopener">${esc(CFG.whatsappShow2||"")}</a>`:""}</div>
     <div class="ccard safe"><b>⚠ ເບີ ແລະ ບັນຊີທາງການ</b><span>ຮ້ານມີເບີ WhatsApp 2 ເບີຂ້າງເທິງເທົ່ານັ້ນ · ຮັບເງິນເຂົ້າຊື່ ${esc(CFG.payName||"")} ເທົ່ານັ້ນ · ຮ້ານບໍ່ເຄີຍຂໍລະຫັດ OTP ຫຼື ລະຫັດຜ່ານ</span></div>
-    <div class="ccard"><b>ໜ້າຮ້ານ</b><span>${esc(CFG.address||"")}</span></div>
+    <div class="ccard"><b>ໜ້າຮ້ານ</b><span>${esc(CFG.address||"")}</span>${CFG.mapUrl?`<a class="cta ghost maplink" href="${esc(CFG.mapUrl)}" target="_blank" rel="noopener">📍 ເປີດແຜນທີ່ ນຳທາງມາຮ້ານ</a>`:""}</div>
     <div class="ccard"><b>ຈັດສົ່ງ</b><span>ໄຣເດີສົ່ງພາຍໃນມື້ໃນນະຄອນຫຼວງວຽງຈັນ · ຕ່າງແຂວງຝາກ ຮຸ່ງອາລຸນ · ອານຸສິດ · ມີໄຊ</span></div>
     <div class="ccard"><b>ຂາຍຍ່ອຍເທົ່ານັ້ນ</b><span>ຮ້ານດູແລສິນຄ້າເອງທຸກຂວດ ເພື່ອໃຫ້ລູກຄ້າໄດ້ຂອງແທ້</span></div>
   </div></div>`;
@@ -316,7 +317,9 @@ function openProduct(id){
   const p = P.find(x=>x.id===id); if(!p) return;
   let opt = p.full ? "full" : "t0", qty = 1, vi = 0;
   const optPrice = o => o==="full" ? p.full : p.trials[+o.slice(1)].price;
-  const optLabel = o => o==="full" ? ("ຂວດເຕັມ "+p.size).trim() : ("ຂວດແບ່ງ "+p.trials[+o.slice(1)].qty).trim();
+  const sheet = p.trials.some(t=>/ແຜ່ນ/.test(t.qty)); // ສິນຄ້າແບບແຜ່ນ (ມາກໜ້າ) ໃຊ້ຄຳ ກ່ອງ/ແຜ່ນ
+  const FULL = sheet ? "ກ່ອງເຕັມ" : "ຂວດເຕັມ", PART = sheet ? "ແຍກແຜ່ນ" : "ຂວດແບ່ງ";
+  const optLabel = o => o==="full" ? (FULL+" "+p.size).trim() : (PART+" "+p.trials[+o.slice(1)].qty).trim();
   const sh = document.createElement("div"); sh.className="sheet"; sh.setAttribute("role","dialog"); sh.setAttribute("aria-modal","true"); sh.setAttribute("aria-label",p.nm);
   const draw = () => {
     const price = optPrice(opt);
@@ -326,8 +329,8 @@ function openProduct(id){
       <div><h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
-        ${p.full?`<button class="opt" data-opt="full" aria-pressed="${opt==='full'}"><span class="t">ຂວດເຕັມ</span><span class="s">${esc(p.size)||'ທັງຂວດ'}</span><span class="p">${kip(p.full)}</span>${p.was>p.full?`<s class="note num">${kip(p.was)}</s>`:''}</button>`:''}
-        ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">ຂວດແບ່ງ</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span></button>`).join("")}
+        ${p.full?`<button class="opt" data-opt="full" aria-pressed="${opt==='full'}"><span class="t">${FULL}</span><span class="s">${esc(p.size)||(sheet?'ທັງກ່ອງ':'ທັງຂວດ')}</span><span class="p">${kip(p.full)}</span>${p.was>p.full?`<s class="note num">${kip(p.was)}</s>`:''}</button>`:''}
+        ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">${PART}</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span></button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
       ${(()=>{const vs=PRODUCT_VIDEOS?vidsOf(p.id):[]; if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
@@ -401,7 +404,7 @@ async function load(url){ const r = await fetch(url, {cache:"no-store"}); if(!r.
     P.sort((a,b)=>(b.photo?1:0)-(a.photo?1:0)); // ສິນຄ້າທີ່ມີຮູບແທ້ຂຶ້ນກ່ອນ
     fetch("videos.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(j=>{ V=Array.isArray(j)?j:[]; render(); }).catch(()=>{});
     // ລາຄາໃນກະຕ່າເກົ່າ ໃຫ້ກົງກັບລາຄາລ່າສຸດ
-    cart = cart.filter(l=>P.some(p=>p.id===l.id)).map(l=>{ const p=P.find(x=>x.id===l.id); const t=p.trials.find(t=>("ຂວດແບ່ງ "+t.qty).trim()===l.opt); return {...l, nm:p.nm, price: t? t.price : (p.full||l.price)}; });
+    cart = cart.filter(l=>P.some(p=>p.id===l.id)).map(l=>{ const p=P.find(x=>x.id===l.id); const t=p.trials.find(t=>("ຂວດແບ່ງ "+t.qty).trim()===l.opt||("ແຍກແຜ່ນ "+t.qty).trim()===l.opt); return {...l, nm:p.nm, price: t? t.price : (p.full||l.price)}; });
     save();
   }
   render();
