@@ -53,6 +53,7 @@ const BRANDS = {hc:"Healthy Care", ntbt:"Nature's Bounty", bm:"Blackmores", ntw:
 const fullBrand = s => String(s).replace(/(^|[\s(\/])(hc|ntbt|bm|ntw|ntm|kl|lsp|spl)(?=[\s)\/.,]|$)/gi, (a,pre,b)=>pre+BRANDS[b.toLowerCase()]);
 // ຍີ່ຫໍ້ ສຳລັບ "ເລືອກຕາມຍີ່ຫໍ້" (ເບິ່ງຈາກຊື່ສິນຄ້າ)
 const BRAND_RX = [["Blackmores",/blackmores/i],["Swisse",/swisse|\bsw\b/i],["Healthy Care",/healthy ?care/i],["Nature's Way",/nature'?s way/i],["Nature's Bounty",/nature'?s bounty/i],["Nature Made",/nature made/i],["Kirkland",/kirkland/i],["Life Space",/life ?space/i],["Bio Island",/bio ?island/i],["Elevit",/elevit|menevit/i],["Centrum",/centrum/i],["Caruso's",/caruso/i],["Micro Organics",/micro ?(organics|genics)|microgenics/i],["Ostelin",/ostelin/i],["NOW",/^now\b|\bnow (foods|vitamin|garlic|gaba|nadh|magnesium|beta|coq10|pumpkin|pycno|astax|sport|egcg|ultra)/i],["Natrol",/natrol/i],["NeoCell",/neocell/i],["Wagner",/wagner/i],["Rifold",/rifold/i],["Musashi",/musashi/i],["Fatblaster",/fat ?blaster/i],["Vital Proteins",/vital proteins/i],["Youtheory",/youtheory/i],["Teddi Lab",/teddi/i],["Sambucol",/sambucol/i],["Brauer",/brauer/i],["L'il Critters",/critters/i],["Aptamil",/aptamil/i],["PediaSure",/pediasure/i],["Alula",/alula/i],["La Roche-Posay",/roche.?pos/i],["CeraVe",/cerave/i],["Aveeno",/aveeno/i],["Eaoron",/eaoron/i],["Thompson's",/thompson/i],["Puritan's Pride",/puritan/i],["Go Healthy",/^go |go healthy/i],["CareVoice",/care ?voice/i],["Dior",/dior|sauvage|jadore/i],["Chanel",/chanel|chance/i],["YSL",/\bysl\b|black opium|libre|mon paris|myslf/i],["Armani",/armani|acqua di gio|si passion|stronger with you/i],["Lancome",/lanc[oô]me|idole|la vie est belle/i],["Burberry",/burberry/i],["Gucci",/gucci/i],["Versace",/versace/i],["Jo Malone",/jo malone/i],["Jean Paul Gaultier",/gaultier|le male/i],["Narciso Rodriguez",/narciso/i],["Armaf",/armaf|club de nuit/i],["MFK",/\bmfk\b|baccarat/i],["Prada",/prada/i],["Sarah Jessica Parker",/sarah jessica|\blovely\b/i],["Ariana Grande",/ariana/i],["Delta",/^delta/i],["Elizabeth Arden",/elizabeth arden|elizabet arden/i],["Britney Spears",/britney/i],["Webber Naturals",/webber/i],["Nature's Care",/nature'?s care|nature care|\bntc\b/i],["Vaseline",/vaseline/i],["Quality of Life",/quality of life/i],["Calvin Klein",/calvin klein|\bck\b/i],["Berocca",/berocca/i],["Bioglan",/bioglan/i],["Inner Health",/inner ?health/i],["Cenovis",/cenovis/i],["Natural Factors",/natural factors/i],["Oral-B",/oral.?b/i],["Colgate",/colgate/i],["One A Day",/one a day/i],["Selsun",/selsun/i],["Vicks",/vick/i],["Life Extension",/life extension/i]];
+const PROMO_RX = /\bsale\b|ໂປຼແຖມ|\*\s*pro\b|\bpro\s*\*|\bpro\s*\d|\bpro\s*$/i; // ຊື່ສິນຄ້າທີ່ມີ Pro / Sale / ໂປຼແຖມ = ສິນຄ້າໂປຣໂມຊັ່ນ
 const brandOf = s => (BRAND_RX.find(([,rx])=>rx.test(s))||[""])[0];
 function toProduct(r, i){
   const id = r.id || String(i+1);
@@ -61,10 +62,10 @@ function toProduct(r, i){
   let type = (r.type||"supplement").trim().toLowerCase();
   if(type!=="perfume" && /ນ້ຳຫອມ|\bED[PT]\b|parfum|cologne|club de nuit/i.test(r.name_lo||"")) type = "perfume";
   const tags = (r.category||"").split(/[|,]/).map(s=>s.trim().toLowerCase()).filter(Boolean)
-    .concat(brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))?["b:"+brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))]:[], yes(r.best_seller)?["best"]:[], yes(r.new)?["new"]:[], yes(r.sale)?["sale"]:[], ["t:"+type]);
+    .concat(brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))?["b:"+brandOf(fullBrand(r.name_lo||r.name_en||"")+" "+(r.brand||""))]:[], (yes(r.best_seller)||(CFG.bestSellers||[]).includes(r.id||String(i+1)))?["best"]:[], yes(r.new)?["new"]:[], (yes(r.sale)||PROMO_RX.test(r.name_lo||""))?["sale"]:[], ["t:"+type]);
   const raw = r.name_lo || r.name_en || "—", nm = fullBrand(raw);
   return {
-    id, nm, en:r.name_en || "", size:r.size || "", brand:fullBrand(r.brand || ""), type, tags,
+    id, rank:(CFG.bestSellers||[]).indexOf(id)+1, nm, en:r.name_en || "", size:r.size || "", brand:fullBrand(r.brand || ""), type, tags,
     full:num(r.price_full), was:num(r.price_old)||0,
     trials, trial: trials[0] || null,
     stock: r.in_stock==="" ? true : yes(r.in_stock),
@@ -137,15 +138,16 @@ function pic(p){
 }
 function card(p){
   return `<button class="card" data-open="${esc(p.id)}" aria-label="${esc(p.nm)}">
-    <div class="pic">${pic(p)}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':'')}${p.trial?`<span class="tag trial">${/ແຜ່ນ/.test(p.trial.qty)?'ແຍກແຜ່ນໄດ້':'ມີຂວດແບ່ງ'}</span>`:''}${hasVid(p.id)?'<span class="vbadge">▶ ມີວິດີໂອ</span>':''}</div>
+    <div class="pic">${pic(p)}${p.rank?`<span class="rank${p.rank<=3?' top':''}">🔥 ຂາຍດີ #${p.rank}</span>`:''}${!p.stock?'<span class="tag out">ໝົດຊົ່ວຄາວ</span>':(p.was>p.full?'<span class="tag">ຫຼຸດລາຄາ</span>':(p.tags.includes("sale")?'<span class="tag promo">🎁 ໂປຣ</span>':''))}${p.trial?`<span class="tag trial">${/ແຜ່ນ/.test(p.trial.qty)?'ແຍກແຜ່ນໄດ້':'ມີຂວດແບ່ງ'}</span>`:''}${hasVid(p.id)?'<span class="vbadge">▶ ມີວິດີໂອ</span>':''}</div>
     <div class="body"><div class="nm">${esc(p.nm)}</div><div class="meta">${esc(TYPE_LB[p.type]||"")}</div>
     <div class="pr">${p.full?`<b>${kip(p.full)}</b>`:`<b>${kip(p.trial.price)}</b>`}${p.was>p.full?`<s>${kip(p.was)}</s>`:''}${p.full&&p.trial?`<small>${/ແຜ່ນ/.test(p.trial.qty)?'ແຜ່ນລະ':'ແບ່ງລອງ'} ${kip(p.trial.price)}</small>`:(!p.full?'<small>ຂວດແບ່ງ</small>':'')}</div></div>
   </button>`;
 }
 function list(){
   const q = query.trim().toLowerCase();
-  return P.filter(p => (!filter || (filter==="trial" ? !!p.trial : p.tags.includes(filter))) &&
+  const r = P.filter(p => (!filter || (filter==="trial" ? !!p.trial : p.tags.includes(filter))) &&
     (!q || q.split(/\s+/).every(w=>p.find.includes(w))));
+  return filter==="best" ? r.sort((a,b)=>(a.rank||99)-(b.rank||99)) : r;
 }
 const brandCounts = () => { const m={}; P.forEach(p=>{ if(p.bk) m[p.bk]=(m[p.bk]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); };
 const brandChip = ([b,c]) => `<button class="bchip" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}">${esc(b)} <span class="num">${c}</span></button>`;
@@ -186,20 +188,20 @@ function renderHome(){
   if(loadErr) return `<div class="wrap"><div class="empty"><b>ໂຫຼດລາຍການສິນຄ້າບໍ່ໄດ້</b><span>${esc(loadErr)}</span><span>ຖາມແອັດມິນທາງ WhatsApp ໄດ້ເລີຍ</span></div></div>`;
   if(!P.length) return `<div class="wrap"><div class="empty"><b>ກຳລັງໂຫຼດສິນຄ້າ…</b></div></div>`;
   const pick = (f,n=12) => P.filter(f).slice(0,n);
-  const best = pick(p=>p.tags.includes("best")), news = pick(p=>p.tags.includes("new")), sale = pick(p=>p.tags.includes("sale"));
+  const best = P.filter(p=>p.tags.includes("best")).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,12), news = pick(p=>p.tags.includes("new")), sale = pick(p=>p.tags.includes("sale")&&p.stock,16);
   const trial = pick(p=>p.trial && p.type==="supplement"), perf = pick(p=>p.type==="perfume" && p.trial), beauty = pick(p=>p.type==="beauty");
   const rowSec = (title, need, arr, note="") => arr.length ? `<section><div class="sechead"><h2>${title}</h2><button class="more" data-need="${need}">ເບິ່ງທັງໝົດ</button></div>${note}<div class="row">${arr.map(card).join("")}</div></section>` : "";
   return `<div class="wrap">
     <section aria-label="ວິທີສັ່ງ"><div class="steps">
       <div class="step"><i>1</i>ເລືອກສິນຄ້າ</div><div class="step"><i>2</i>ເລືອກຂວດເຕັມ ຫຼື ຂວດແບ່ງ</div><div class="step"><i>3</i>ໃສ່ກະຕ່າ</div><div class="step"><i>4</i>ສົ່ງອໍເດີທາງ WhatsApp</div>
     </div></section>
+    ${rowSec("🔥 ສິນຄ້າຂາຍດີ ທີ່ລູກຄ້າສັ່ງຫຼາຍທີ່ສຸດ","best",best,'<p class="note" style="margin:-4px 0 10px">ຈັດອັນດັບຈາກຍອດສັ່ງຊື້ຈິງຂອງຮ້ານ · ລູກຄ້າເລືອກຊື້ຊ້ຳຫຼາຍທີ່ສຸດ</p>')}
+    ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
     <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
     <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brands">${brandCounts().slice(0,14).map(brandChip).join("")}</div></section>
-    ${rowSec("ຂາຍດີ","best",best)}
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
-    ${rowSec("ລາຄາພິເສດ","sale",sale)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
     ${rowSec("ເຄື່ອງສຳອາງ","t:beauty",beauty)}
     ${CFG.mapUrl?`<a class="mapbar" href="${esc(CFG.mapUrl)}" target="_blank" rel="noopener"><span>📍</span><span><b>ໜ້າຮ້ານ nnz ວິຕາມິນ</b><small>${esc(CFG.address||"")}</small></span><span class="go">ນຳທາງ ›</span></a>`:""}
@@ -208,7 +210,7 @@ function renderHome(){
 }
 function renderAll(){
   const items = list();
-  const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ລາຄາພິເສດ"}[filter] || "")) : "ສິນຄ້າທັງໝົດ";
+  const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ສິນຄ້າໂປຣໂມຊັ່ນ"}[filter] || "")) : "ສິນຄ້າທັງໝົດ";
   return `<div class="wrap">
     <div class="sechead"><h2>${esc(query?`ຜົນຄົ້ນຫາ "${query}"`:nm)}</h2>${filter||query?'<button class="more" data-clear>ລ້າງຕົວກອງ</button>':''}</div>
     <div class="needs" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))">${NEEDS.map(needBtn).join("")}</div>
@@ -305,7 +307,7 @@ let toastT;
 function toast(t){ let el=$(".toast"); if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el);} el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1800); }
 
 function heroPic(p){
-  const m = /^p\/((?:fb|p2)_\d{4}\.jpg|pf_\d{2}\.jpg|cw_\d+\.jpg)$/.exec(p.photo||"");
+  const m = /^p\/((?:fb|p2|pg)_\d{4}\.jpg|pf_\d{2}\.jpg|cw_\d+\.jpg)$/.exec(p.photo||"");
   if(!m) return pic(p);
   return `<img src="images/hd/${m[1]}" alt="${esc(p.nm)}" onerror="this.onerror=null;this.src='images/${esc(p.photo)}'" style="width:100%;height:100%;object-fit:contain;display:block">`;
 }
@@ -331,7 +333,7 @@ function openProduct(id){
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
       <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${heroPic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
-      <div><h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
+      <div>${p.rank?`<span class="rankline">🔥 ສິນຄ້າຂາຍດີອັນດັບ ${p.rank} ຂອງຮ້ານ</span>`:''}<h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
         ${p.full?`<button class="opt" data-opt="full" aria-pressed="${opt==='full'}"><span class="t">${FULL}</span><span class="s">${esc(p.size)||(sheet?'ທັງກ່ອງ':'ທັງຂວດ')}</span><span class="p">${kip(p.full)}</span>${p.was>p.full?`<s class="note num">${kip(p.was)}</s>`:''}</button>`:''}
