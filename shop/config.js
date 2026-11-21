@@ -21,5 +21,15 @@ window.NNZ_CONFIG = {
   sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbmuHipwfnenuKapbiU2JdywWGnZ5_M7pRYDmJP13xl6Z7ISSon6NLpb_iFnE6Nwrc6jZ9DN1NWZ2g/pub?output=csv",
 
   // true = ສະແດງແຖບສີເຫຼືອງ "ແອັບຕົວຢ່າງ" · ປ່ຽນເປັນ false ເມື່ອສິນຄ້າ ລາຄາ ແລະ ເບີເປັນຂອງຈິງແລ້ວ
-  sampleMode: false
+  sampleMode: false,
+
+  // ໂຄດສ່ວນຫຼຸດ ລອງສັ່ງທາງແອັບ · ປ່ຽນຕົວເລກ ຫຼື ວັນໝົດເຂດໄດ້ · ປິດໂຄດ: ປ່ຽນ active ເປັນ false
+  promo: {
+    active: true,
+    code: "NNZAPP",        // ໂຄດທີ່ລູກຄ້າພິມ (ບໍ່ສົນຕົວພິມໃຫຍ່-ນ້ອຍ)
+    off: 20000,            // ຫຼຸດ (ກີບ)
+    min: 300000,           // ຍອດສິນຄ້າຂັ້ນຕ່ຳ (ກີບ)
+    until: "2026-12-31",   // ໃຊ້ໄດ້ຮອດວັນນີ້
+    note: "1 ເບີໂທ ໃຊ້ໄດ້ 1 ຄັ້ງ"
+  }
 };

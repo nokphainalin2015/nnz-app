@@ -217,10 +217,20 @@ function renderAll(){
   </div>`;
 }
 const cartTotal = () => cart.reduce((s,l)=>s+l.price*l.qty,0);
+// ໂຄດສ່ວນຫຼຸດ (ຕັ້ງຄ່າໃນ config.js → promo)
+let promo = store("nnz-promo") || "";
+function promoInfo(){
+  const P = CFG.promo; if(!P || !P.active || !promo) return {off:0, msg:""};
+  if(promo.trim().toUpperCase() !== String(P.code).toUpperCase()) return {off:0, msg:"ໂຄດນີ້ໃຊ້ບໍ່ໄດ້", bad:true};
+  if(P.until && new Date().toISOString().slice(0,10) > P.until) return {off:0, msg:"ໂຄດນີ້ໝົດເຂດແລ້ວ", bad:true};
+  const t = cartTotal(); if(t < (P.min||0)) return {off:0, msg:`ຊື້ຄົບ ${kip(P.min)} ກໍ່ໃຊ້ໂຄດໄດ້ · ຂາດອີກ ${kip(P.min - t)}`, bad:true};
+  return {off: Math.min(P.off||0, t), msg:`ໃຊ້ໂຄດ ${String(P.code).toUpperCase()} ແລ້ວ · ຫຼຸດ ${kip(P.off)}`};
+}
+const payTotal = () => cartTotal() - promoInfo().off;
 function orderText(){
   const d = DELIVERY.find(x=>x.id===delivery) || DELIVERY[0];
   const lines = cart.map((l,i)=>`${i+1}. ${l.nm} (${l.opt}) x${l.qty} = ${kip(l.price*l.qty)}`).join("\n");
-  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\nລະຫັດອໍເດີ: ${orderCode}\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\nຈັດສົ່ງ: ${d.lb} (${d.sub})\n${d.id==='rider'?'ທີ່ຢູ່ / ຈຸດສົ່ງ':'ສາຂາຂົນສົ່ງ ('+d.lb.replace('ຂົນສົ່ງ ','')+')'}: ${cust.place||''}\n\nຊື່: ${cust.name||''}\nເບີໂທ: ${cust.phone||''}\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
+  return `APP · ອໍເດີໃໝ່ຈາກແອັບ nnz\nລະຫັດອໍເດີ: ${orderCode}\n${lines}\nລວມຄ່າສິນຄ້າ: ${kip(cartTotal())}\n${promoInfo().off?`ໂຄດສ່ວນຫຼຸດ: ${String(CFG.promo.code).toUpperCase()} −${kip(promoInfo().off)}\nຍອດຕ້ອງຈ່າຍ: ${kip(payTotal())}\n`:""}ຈັດສົ່ງ: ${d.lb} (${d.sub})\n${d.id==='rider'?'ທີ່ຢູ່ / ຈຸດສົ່ງ':'ສາຂາຂົນສົ່ງ ('+d.lb.replace('ຂົນສົ່ງ ','')+')'}: ${cust.place||''}\n\nຊື່: ${cust.name||''}\nເບີໂທ: ${cust.phone||''}\nຈ່າຍແບບ: ${pay==="qr"?"ສະແກນ QR (ແນບສະລິບ)":"ເກັບເງິນປາຍທາງ (COD)"}`;
 }
 function renderCart(){
   if(!cart.length) return `<div class="wrap"><h2>ກະຕ່າ</h2><div class="empty"><b>ກະຕ່າຍັງວ່າງ</b><span>ເລືອກສິນຄ້າ ແລ້ວກົດ "ໃສ່ກະຕ່າ"</span><button class="cta" data-tab-go="home" style="flex:none">ເລືອກສິນຄ້າ</button></div></div>`;
@@ -237,14 +247,19 @@ function renderCart(){
       <label class="fld"><span>ຊື່ຜູ້ຮັບ</span><input class="inp" data-cust="name" value="${esc(cust.name||"")}" autocomplete="name"></label>
       <label class="fld"><span>ເບີໂທຜູ້ຮັບ</span><input class="inp" data-cust="phone" value="${esc(cust.phone||"")}" inputmode="tel" autocomplete="tel" placeholder="020 xxxx xxxx"></label>
     </div>
+    ${CFG.promo&&CFG.promo.active?`<div class="fieldset promo"><b>ໂຄດສ່ວນຫຼຸດ</b>
+      <div class="promorow"><input class="inp" id="promoInp" value="${esc(promo)}" placeholder="ພິມໂຄດ ເຊັ່ນ ${esc(CFG.promo.code)}" autocapitalize="characters" autocomplete="off"><button class="cta ghost" data-promo>ໃຊ້ໂຄດ</button></div>
+      ${promoInfo().msg?`<p class="note ${promoInfo().bad?"promobad":"promook"}" style="margin:0">${esc(promoInfo().msg)}</p>`:`<p class="note" style="margin:0">ລອງສັ່ງທາງແອັບ ຫຼຸດ ${kip(CFG.promo.off)} ເມື່ອຊື້ຄົບ ${kip(CFG.promo.min)}</p>`}
+    </div>`:""}
     <div class="total"><span>ລວມຄ່າສິນຄ້າ</span><span class="num">${kip(cartTotal())}</span></div>
+    ${promoInfo().off?`<div class="total" style="color:var(--leaf-deep)"><span>ສ່ວນຫຼຸດ (${esc(String(CFG.promo.code).toUpperCase())})</span><span class="num">−${kip(promoInfo().off)}</span></div><div class="total"><span><b>ຍອດຕ້ອງຈ່າຍ</b></span><span class="num"><b>${kip(payTotal())}</b></span></div>`:""}
     <p class="note">ຍັງບໍ່ລວມຄ່າສົ່ງ · ແອັດມິນຈະແຈ້ງຄ່າສົ່ງໃນ WhatsApp</p>
     <div class="fieldset" role="radiogroup" aria-label="ວິທີຈ່າຍເງິນ"><b>ວິທີຈ່າຍເງິນ</b>
       <label class="radio" for="py-qr"><input type="radio" id="py-qr" name="py" value="qr" ${pay==="qr"?'checked':''}><span>ສະແກນ QR ຈ່າຍເລີຍ<small>OnePay · LAO QR · ຈ່າຍໄດ້ທຸກທະນາຄານ</small></span></label>
       <label class="radio" for="py-cod"><input type="radio" id="py-cod" name="py" value="cod" ${pay==="cod"?'checked':''}><span>ເກັບເງິນປາຍທາງ (COD)<small>ຈ່າຍເມື່ອຮັບເຄື່ອງ</small></span></label>
     </div>
     ${pay==="qr"&&CFG.payQr?`<div class="payqr">
-      <p class="paystep"><b>1.</b> ໂອນຄ່າສິນຄ້າ <span class="num">${kip(cartTotal())}</span> ໃຫ້ກົງຍອດ</p>
+      <p class="paystep"><b>1.</b> ໂອນຄ່າສິນຄ້າ <span class="num">${kip(payTotal())}</span> ໃຫ້ກົງຍອດ</p>
       <p class="paystep"><b>2.</b> ໃນຊ່ອງ <b>ໝາຍເຫດ / ເນື້ອໃນການໂອນ</b> ໃສ່ລະຫັດອໍເດີ <span class="ocode num">${esc(orderCode)}</span></p>
       <img src="${esc(CFG.payQr)}" alt="QR ຮັບເງິນ ${esc(CFG.payName||"")}" width="260" height="295">
       <p class="note">ຊື່ບັນຊີ: ${esc(CFG.payName||"")} · ກວດຊື່ໃຫ້ກົງກ່ອນໂອນ</p>
@@ -358,6 +373,7 @@ document.addEventListener("click", e => {
   if(e.target.closest("[data-clear]")){ filter=null; query=""; $("#q").value=""; render(); return; }
   const inc = e.target.closest("[data-inc]"); if(inc){ cart[+inc.dataset.inc].qty++; save(); render(); return; }
   const dec = e.target.closest("[data-dec]"); if(dec){ const i=+dec.dataset.dec; cart[i].qty--; if(cart[i].qty<1) cart.splice(i,1); save(); render(); return; }
+  if(e.target.closest("[data-promo]")){ const v=($("#promoInp")||{}).value||""; promo=v.trim(); store("nnz-promo",promo); render(); const i=promoInfo(); if(i.off) toast("ໃຊ້ໂຄດແລ້ວ ຫຼຸດ "+kip(i.off)); return; }
   if(e.target.closest("#copyMsg")){ const ta=$("#msg"); const fb=()=>{ta.select();toast("ກົດຄ້າງແລ້ວເລືອກ ຄັດລອກ");}; try{ navigator.clipboard.writeText(ta.value).then(()=>toast("ຄັດລອກແລ້ວ"),fb); }catch(_){ fb(); } }
 });
 document.addEventListener("input", e => {
