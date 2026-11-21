@@ -382,13 +382,6 @@ function openProduct(id){
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
       <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${heroPic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
-      <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><b class="ph">📝 ວິທີສັ່ງຊື້ 5 ຂັ້ນຕອນ</b><ol>
-        <li><i>1</i><span>ເລືອກ <b>ຂວດເຕັມ</b> ຫຼື <b>ຂວດແບ່ງ</b></span></li>
-        <li><i>2</i><span>ກົດ <b>+</b> <b>−</b> ເລືອກຈຳນວນ</span></li>
-        <li><i>3</i><span>ກົດປຸ່ມແດງ <b>ໃສ່ກະຕ່າ</b></span></li>
-        <li><i>4</i><span>ກົດ <b>ກະຕ່າ 🛒</b> ລຸ່ມຈໍ ກອກຊື່ ເບີ ທີ່ຢູ່</span></li>
-        <li><i>5</i><span>ກົດ <b>ສົ່ງອໍເດີທາງ WhatsApp</b> ແລ້ວກົດສົ່ງ</span></li>
-      </ol><p class="phelp">ບໍ່ເຂົ້າໃຈ? ກົດ <b>ແຊັດ</b> ຖາມແອັດມິນ 💬</p></div>
       <div>${p.promoLabel?`<span class="rankline" style="background:#e52535;color:#fff;margin-right:4px">🎁 ${esc(p.promoLabel)}</span>`:''}${p.rank?`<span class="rankline">🔥 ສິນຄ້າຂາຍດີອັນດັບ ${p.rank} ຂອງຮ້ານ</span>`:''}<h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
@@ -396,6 +389,13 @@ function openProduct(id){
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">${PART}</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span>${t.was>t.price?`<s class="note num">${kip(t.was)}</s>`:''}</button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
+      <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><b class="ph">📝 ວິທີສັ່ງຊື້ 5 ຂັ້ນຕອນ</b><ol>
+        <li><i>1</i><span>ເລືອກ <b>${FULL}</b> ຫຼື <b>${PART}</b></span></li>
+        <li><i>2</i><span>ກົດ <b>+</b> <b>−</b> ເລືອກຈຳນວນ</span></li>
+        <li><i>3</i><span>ກົດປຸ່ມແດງ <b>ໃສ່ກະຕ່າ</b></span></li>
+        <li><i>4</i><span>ກົດ <b>ກະຕ່າ 🛒</b> ລຸ່ມຈໍ ກອກຊື່ ເບີ ທີ່ຢູ່</span></li>
+        <li><i>5</i><span>ກົດ <b>ສົ່ງອໍເດີທາງ WhatsApp</b> ແລ້ວກົດສົ່ງ</span></li>
+      </ol><p class="phelp">ບໍ່ເຂົ້າໃຈ? ກົດ <b>ແຊັດ</b> ຖາມແອັດມິນ 💬</p></div>
       ${(()=>{const vs=PRODUCT_VIDEOS?vidsOf(p.id):[]; if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
         return `<div class="pvid"><div class="sechead" style="margin:0"><h2 style="font-size:16px">ວິດີໂອສິນຄ້ານີ້</h2>${vs.length>1?`<button class="more" data-vnext>ຄລິບອື່ນ (${vi%vs.length+1}/${vs.length})</button>`:''}</div>
         <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=0&description=0&music_info=0" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
