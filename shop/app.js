@@ -172,6 +172,14 @@ const BRAND_COLOR = {"Swisse":"#1f3c88","Healthy Care":"#2e7d32","Blackmores":"#
 const BRAND_MARK = {"NOW":"NOW","YSL":"YSL","MFK":"MFK","Swisse":"SW","Blackmores":"BM","Kirkland":"KL","Centrum":"CT","Elevit":"EL","Ostelin":"OS","Natrol":"NT","NeoCell":"NC","Wagner":"WG","Musashi":"MS","Caruso's":"CR","PediaSure":"PS","Alula":"AL","CeraVe":"CV","Aveeno":"AV","Dior":"DIOR","Chanel":"CC","Armani":"GA","Burberry":"BB","Gucci":"GG","Versace":"VS","Prada":"PR","Lancome":"LC","Vaseline":"VS","Berocca":"BR","Bioglan":"BG","Cenovis":"CN","Colgate":"CG","Vicks":"VK","Selsun":"SS","Rifold":"RF","Sambucol":"SB","Brauer":"BR","Youtheory":"YT","Eaoron":"EA","Armaf":"AF","Delta":"DT","Fatblaster":"FB"};
 const brandMark = b => { if(BRAND_MARK[b]) return BRAND_MARK[b]; const w = b.replace(/[^A-Za-z0-9' -]/g,"").split(/[\s-]+/).filter(Boolean); return (w.length>1 ? w[0][0]+w[1][0] : (w[0]||"?").slice(0,2)).toUpperCase(); };
 const brandChip = ([b,c]) => `<button class="btile" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}"><span class="bmark" style="background:${BRAND_COLOR[b]||`hsl(${hueOf(b)} 45% 38%)`}">${esc(brandMark(b))}</span><span class="bname">${esc(b)}</span><span class="bnum num">${c} ລາຍການ</span></button>`;
+let bdGroup = "all";
+function renderDrop(){
+  const all = brandCounts().filter(([b])=>bdGroup==="all"||brandGroupOf(b)===bdGroup).sort((a,b)=>a[0].localeCompare(b[0],"en",{sensitivity:"base"}));
+  const byL = {}; all.forEach(x=>{ const L=(x[0][0]||"#").toUpperCase(); (byL[L]=byL[L]||[]).push(x); });
+  const tabs = [["all","ທັງໝົດ"]].concat(BRAND_GROUPS).map(([g,lb])=>`<button type="button" data-bdg="${g}" aria-pressed="${bdGroup===g}">${lb}</button>`).join("");
+  $("#bdrop").innerHTML = `<div class="bd-in"><div class="bd-tabs">${tabs}</div>${Object.keys(byL).sort().map(L=>`<div class="bd-letter">${esc(L)}</div>${byL[L].map(([b,c])=>`<button type="button" class="bd-item" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}"><span class="bmark" style="background:${BRAND_COLOR[b]||`hsl(${hueOf(b)} 45% 38%)`}">${esc(brandMark(b))}</span><b>${esc(b)}</b><span class="num">${c}</span></button>`).join("")}`).join("")}</div>`;
+}
+function toggleDrop(open){ const d=$("#bdrop"), btn=$("#brandsBtn"); open = open===undefined ? d.hidden : open; if(open){ renderDrop(); d.scrollTop=0; } d.hidden=!open; btn.setAttribute("aria-expanded", String(open)); }
 const brandGrid = (arr) => `<div class="bgrid">${arr.map(brandChip).join("")}</div>`;
 const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb} <span class="num">· ${arr.length} ຍີ່ຫໍ້ ປັດເບິ່ງ ›</span></h3><div class="brow">${arr.map(brandChip).join("")}</div>`:""; }).join(""); };
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
@@ -236,8 +244,7 @@ function renderAll(){
   const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ສິນຄ້າໂປຣໂມຊັ່ນ"}[filter] || "")) : "ສິນຄ້າທັງໝົດ";
   return `<div class="wrap">
     <div class="sechead"><h2>${esc(query?`ຜົນຄົ້ນຫາ "${query}"`:nm)}</h2>${filter||query?'<button class="more" data-clear>ລ້າງຕົວກອງ</button>':''}</div>
-    <div class="needs" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))">${NEEDS.map(needBtn).join("")}</div>
-    <details class="brandbox"${filter&&filter.startsWith("b:")||showBrands?" open":""}><summary>ເລືອກຕາມຍີ່ຫໍ້</summary>${brandSections()}</details>
+    ${filter&&filter.startsWith("b:")?`<button class="cta ghost" type="button" id="pickBrand" style="height:40px;font-size:14px">ເລືອກຍີ່ຫໍ້ອື່ນ ▾</button>`:`<div class="needs" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))">${NEEDS.map(needBtn).join("")}</div>`}
     <p class="note num" style="margin:0">${items.length.toLocaleString("en-US")} ລາຍການ</p>
     ${items.length?`<div class="grid">${items.slice(0,shown).map(card).join("")}</div>${items.length>shown?`<button class="cta ghost" data-more style="width:100%">ເບິ່ງເພີ່ມ (ເຫຼືອ <span class="num">${(items.length-shown).toLocaleString("en-US")}</span>)</button>`:''}`:`<div class="empty"><b>ບໍ່ພົບສິນຄ້າທີ່ຄົ້ນຫາ</b><span>ລອງພິມຊື່ອື່ນ ຫຼື ຖາມແອັດມິນທາງ WhatsApp</span></div>`}
   </div>`;
@@ -397,11 +404,14 @@ function openProduct(id){
 }
 
 document.addEventListener("click", e => {
+  if(e.target.closest("#brandsBtn")){ toggleDrop(); return; }
+  const bg = e.target.closest("[data-bdg]"); if(bg){ bdGroup=bg.dataset.bdg; renderDrop(); return; }
+  if(!$("#bdrop").hidden){ const inDrop = e.target.closest("#bdrop"); if(!inDrop || e.target.closest(".bd-item")) toggleDrop(false); if(!inDrop) return; }
   const t = e.target.closest("nav.tabs button"); if(t){ tab=t.dataset.tab; if(tab==="home"){filter=null;query="";$("#q").value="";} render(); window.scrollTo(0,0); return; }
   const g = e.target.closest("[data-tab-go]"); if(g){ tab=g.dataset.tabGo; render(); return; }
   const o = e.target.closest("[data-open]"); if(o){ openProduct(o.dataset.open); return; }
   const vd = e.target.closest("[data-vid]"); if(vd){ openVideo(vd.dataset.vid); return; }
-  if(e.target.closest("[data-brands]")){ showBrands=true; filter=null; tab="all"; render(); window.scrollTo(0,0); return; }
+  if(e.target.closest("[data-brands]")||e.target.closest("#pickBrand")){ window.scrollTo(0,0); toggleDrop(true); return; }
   const n = e.target.closest("[data-need]"); if(n){ filter = filter===n.dataset.need && tab==="all" ? null : n.dataset.need; tab="all"; render(); window.scrollTo(0,0); return; }
   if(e.target.closest("[data-more]")){ shown += 40; render(); return; }
   if(e.target.closest("[data-clear]")){ filter=null; query=""; $("#q").value=""; render(); return; }
