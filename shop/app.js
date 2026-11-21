@@ -11,11 +11,11 @@ const NEEDS = [
   {id:"liver", lb:"ຕັບ ແລະ ການຍ່ອຍ", ic:'<path d="M4 9c0-3 3-4 8-4s8 2 8 5-3 9-9 9c-4 0-7-4-7-10z"/>'},
   {id:"kids", lb:"ເດັກນ້ອຍ", ic:'<circle cx="12" cy="9" r="4"/><path d="M6 20c1-3 3.5-5 6-5s5 2 6 5"/>'},
   {id:"women", lb:"ແມ່ ແລະ ຜູ້ຍິງ", ic:'<circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/>'},
-  {id:"t:beauty", lb:"ຄວາມງາມ", ic:'<path d="M9 3h6v4H9z"/><rect x="7" y="7" width="10" height="14" rx="3"/>'},
+  {id:"t:beauty", lb:"ເຄື່ອງສຳອາງ", ic:'<path d="M9 3h6v4H9z"/><rect x="7" y="7" width="10" height="14" rx="3"/>'},
   {id:"t:perfume", lb:"ນ້ຳຫອມ", ic:'<path d="M10 3h4v3h-4z"/><rect x="6" y="8" width="12" height="13" rx="3"/><path d="M12 6v2"/>'},
   {id:"t:sport", lb:"ກິລາ ແລະ ໂປຣຕີນ", ic:'<path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/>'}
 ];
-const TYPE_LB = {supplement:"ວິຕາມິນ ແລະ ອາຫານເສີມ", beauty:"ຄວາມງາມ", perfume:"ນ້ຳຫອມ", sport:"ກິລາ ແລະ ໂປຣຕີນ", other:"ອື່ນໆ"};
+const TYPE_LB = {supplement:"ວິຕາມິນ ແລະ ອາຫານເສີມ", beauty:"ເຄື່ອງສຳອາງ", perfume:"ນ້ຳຫອມ", sport:"ກິລາ ແລະ ໂປຣຕີນ", other:"ອື່ນໆ"};
 const DELIVERY = [
   {id:"rider", lb:"ໄຣເດີສົ່ງພາຍໃນມື້", sub:"ນະຄອນຫຼວງວຽງຈັນ"},
   {id:"hal", lb:"ຂົນສົ່ງ ຮຸ່ງອາລຸນ", sub:"ຕ່າງແຂວງ"},
@@ -70,7 +70,7 @@ function toProduct(r, i){
     stock: r.in_stock==="" ? true : yes(r.in_stock),
     photo: r.photo || "", tiktok: r.tiktok || "", hue: hueOf(r.brand||nm),
     bk: brandOf(nm+" "+(r.brand||"")),
-    find: (nm+" "+raw+" "+(r.name_en||"")+" "+(r.search||"")).toLowerCase()
+    find: (nm+" "+raw+" "+(r.name_en||"")+" "+(r.search||"")+(type==="beauty"?" ເຄື່ອງສຳອາງ ສຳອາງ ຄວາມງາມ cosmetic":"")).toLowerCase()
   };
 }
 
@@ -201,7 +201,7 @@ function renderHome(){
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
     ${rowSec("ລາຄາພິເສດ","sale",sale)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
-    ${rowSec("ຄວາມງາມ","t:beauty",beauty)}
+    ${rowSec("ເຄື່ອງສຳອາງ","t:beauty",beauty)}
     ${CFG.mapUrl?`<a class="mapbar" href="${esc(CFG.mapUrl)}" target="_blank" rel="noopener"><span>📍</span><span><b>ໜ້າຮ້ານ nnz ວິຕາມິນ</b><small>${esc(CFG.address||"")}</small></span><span class="go">ນຳທາງ ›</span></a>`:""}
     <p class="note" style="text-align:center">ສິນຄ້າທັງໝົດ <span class="num">${P.length.toLocaleString("en-US")}</span> ລາຍການ · ຄົ້ນຫາດ້ວຍຊື່ ຫຼື ຍີ່ຫໍ້ໄດ້ທາງເທິງ</p>
   </div>`;
