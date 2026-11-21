@@ -350,7 +350,7 @@ function openProduct(id){
       <div>${p.promoLabel?`<span class="rankline" style="background:#e52535;color:#fff;margin-right:4px">🎁 ${esc(p.promoLabel)}</span>`:''}${p.rank?`<span class="rankline">🔥 ສິນຄ້າຂາຍດີອັນດັບ ${p.rank} ຂອງຮ້ານ</span>`:''}<h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
-        ${p.full?`<button class="opt" data-opt="full" aria-pressed="${opt==='full'}"><span class="t">${FULL}</span><span class="s">${esc(p.size)||(sheet?'ທັງກ່ອງ':'ທັງຂວດ')}</span><span class="p">${kip(p.full)}</span>${p.was>p.full?`<s class="note num">${kip(p.was)}</s>`:''}</button>`:''}
+        ${p.full?`<button class="opt" data-opt="full" aria-pressed="${opt==='full'}"><span class="t">${FULL}</span><span class="s">${esc(p.size)||((sheet||strip)?'ທັງກ່ອງ':'ທັງຂວດ')}</span><span class="p">${kip(p.full)}</span>${p.was>p.full?`<s class="note num">${kip(p.was)}</s>`:''}</button>`:''}
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">${PART}</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span>${t.was>t.price?`<s class="note num">${kip(t.was)}</s>`:''}</button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
