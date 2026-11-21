@@ -56,7 +56,8 @@ const BRAND_RX = [["Blackmores",/blackmores/i],["Swisse",/swisse|\bsw\b/i],["Hea
 const PROMO_RX = /\bsale\b|ໂປຼແຖມ|\*\s*pro\b|\bpro\s*\*|\bpro\s*\d|\bpro\s*$/i; // ຊື່ສິນຄ້າທີ່ມີ Pro / Sale / ໂປຼແຖມ = ສິນຄ້າໂປຣໂມຊັ່ນ
 function applyTimedPromos(list){ // ລາຄາໂປຣຕາມວັນ (config.timedPromos) · ເວລາລາວ UTC+7
   const now = Date.now();
-  (CFG.timedPromos||[]).forEach(t=>{
+  const all = list.filter(p=>p.promo).map(p=>p.promo).concat((CFG.timedPromos||[]).filter(t=>!list.some(p=>p.promo&&p.id===t.id))); // ໂປຣຈາກ Sheet (ໜ້າແອັດມິນ) ກ່ອນ, ແລ້ວຈາກ config
+  all.forEach(t=>{
     const from = Date.parse(t.from+"T00:00:00+07:00"), end = Date.parse(t.until+"T23:59:59+07:00");
     if(!(now>=from && now<=end)) return;
     const p = list.find(x=>x.id===t.id); if(!p) return;
@@ -81,6 +82,7 @@ function toProduct(r, i){
     id, rank:(CFG.bestSellers||[]).indexOf(id)+1, nm, en:r.name_en || "", size:r.size || "", brand:fullBrand(r.brand || ""), type, tags,
     full:num(r.price_full), was:num(r.price_old)||0,
     trials, trial: trials[0] || null,
+    promo: (r.promo_until||"").trim() ? {id, label:r.promo_label||"", from:(r.promo_from||"").trim()||"2000-01-01", until:r.promo_until.trim(), full:num(r.promo_full), trial:(r.promo_trial||"").split("|").map(num)} : null,
     stock: r.in_stock==="" ? true : yes(r.in_stock),
     photo: r.photo || "", tiktok: r.tiktok || "", hue: hueOf(r.brand||nm),
     bk: brandOf(nm+" "+(r.brand||"")),
