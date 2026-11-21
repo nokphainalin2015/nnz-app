@@ -382,7 +382,13 @@ function openProduct(id){
     sh.innerHTML = `<div class="panel"><div class="grab"></div><div class="wrap">
       <button class="close" data-x>ປິດ</button>
       <div class="hero${p.photo?' zoomable':''}" ${p.photo?'data-zoom role="button" aria-label="ກົດເພື່ອຂະຫຍາຍຮູບ"':''}>${heroPic(p)}${p.photo?'<span class="zhint">🔍 ກົດເບິ່ງຮູບໃຫຍ່</span>':''}</div>${p.photo?'':'<p class="note" style="margin:-6px 0 0">ຮູບປະກອບ · ສິນຄ້າຈິງອາດຕ່າງຈາກຮູບ</p>'}
-      <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><span><i>1</i>ເລືອກຂວດເຕັມ<br>ຫຼື ຂວດແບ່ງ</span><span><i>2</i>ເລືອກ<br>ຈຳນວນ</span><span><i>3</i>ກົດ<br>ໃສ່ກະຕ່າ</span><span><i>4</i>ສົ່ງອໍເດີ<br>ທາງ WhatsApp</span></div>
+      <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><b class="ph">📝 ວິທີສັ່ງຊື້ ງ່າຍໆ 5 ຂັ້ນຕອນ</b><ol>
+        <li><i>1</i><span>ກົດເລືອກ <b>"ຂວດເຕັມ"</b> ຫຼື <b>"ຂວດແບ່ງ"</b> ທີ່ກ່ອງລາຄາທາງລຸ່ມ</span></li>
+        <li><i>2</i><span>ກົດ <b>+</b> ຫຼື <b>−</b> ເພື່ອເລືອກຈຳນວນທີ່ຕ້ອງການ</span></li>
+        <li><i>3</i><span>ກົດປຸ່ມສີແດງ <b>"ໃສ່ກະຕ່າ"</b> · ຢາກຊື້ຫຼາຍຢ່າງ ກັບໄປເລືອກສິນຄ້າອື່ນຕໍ່ໄດ້</span></li>
+        <li><i>4</i><span>ກົດ <b>"ກະຕ່າ" 🛒</b> ທາງລຸ່ມຈໍ ແລ້ວກອກ <b>ຊື່ · ເບີໂທ · ທີ່ຢູ່</b> ເລືອກວິທີຈັດສົ່ງ ແລະ ວິທີຈ່າຍເງິນ</span></li>
+        <li><i>5</i><span>ກົດ <b>"ສົ່ງອໍເດີທາງ WhatsApp"</b> ແອັບຈະເດັ້ງໄປ WhatsApp ພ້ອມຂໍ້ຄວາມອໍເດີ · ກົດປຸ່ມ <b>ສົ່ງ ➤</b> ແລ້ວລໍຖ້າແອັດມິນຕອບ</span></li>
+      </ol><p class="phelp">ບໍ່ເຂົ້າໃຈ ຫຼື ສັ່ງບໍ່ໄດ້? ກົດ <b>"ແຊັດ"</b> ທາງເທິງ ຖາມແອັດມິນໄດ້ເລີຍ 💬</p></div>
       <div>${p.promoLabel?`<span class="rankline" style="background:#e52535;color:#fff;margin-right:4px">🎁 ${esc(p.promoLabel)}</span>`:''}${p.rank?`<span class="rankline">🔥 ສິນຄ້າຂາຍດີອັນດັບ ${p.rank} ຂອງຮ້ານ</span>`:''}<h2 style="font-size:20px">${esc(p.nm)}</h2><div class="note">${esc([p.brand,TYPE_LB[p.type],p.size].filter(Boolean).join(" · "))}</div></div>
       <span class="stock ${p.stock?'':'out'}">${p.stock?'ມີສິນຄ້າ ພ້ອມສົ່ງ':'ໝົດຊົ່ວຄາວ · ກຳລັງນຳເຂົ້າ'}</span>
       <div class="opts">
