@@ -198,7 +198,7 @@ function needCards(){
   }).join("");
 }
 const MOM_RX = /pediasure|aptamil|alula|elevit|menevit|natalis|pregnan|breastfeed|infant|\bbaby|\bkids?\b|ເດັກ|critters|bio ?island|pentavite|teen|ນົມເດັກ/i;
-const CATS = [{id:"g:vit",lb:"ວິຕາມິນ ແລະ ອາຫານເສີມ",img:"cat/cat_vit.jpg"},{id:"g:beauty",lb:"ຄວາມງາມ ແລະ ເຄື່ອງສຳອາງ",img:"cat/cat_beauty.jpg"},{id:"g:mom",lb:"ສິນຄ້າແມ່ ແລະ ເດັກ",img:"cat/cat_mom.jpg"},{id:"g:perfume",lb:"ນ້ຳຫອມ",img:"cat/cat_perfume.jpg"}];
+const CATS = [{id:"g:vit",lb:"ວິຕາມິນ ແລະ ອາຫານເສີມ",img:"cat/c2_vit.jpg"},{id:"g:beauty",lb:"ຄວາມງາມ ແລະ ເຄື່ອງສຳອາງ",img:"cat/c2_beauty.jpg"},{id:"g:mom",lb:"ສິນຄ້າແມ່ ແລະ ເດັກ",img:"cat/c2_mom.jpg"},{id:"g:perfume",lb:"ນ້ຳຫອມ",img:"cat/c2_perfume.jpg"}];
 const catCard = c => `<button class="ccard" data-need="${c.id}" aria-pressed="${filter===c.id}"><img src="images/${c.img}" alt="${c.lb}" loading="lazy"><span class="clab">${c.lb}</span></button>`;
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${NEED_COLOR[n.id]||"#e52535"};--cb:${(NEED_COLOR[n.id]||"#e52535")}30;--cb2:${(NEED_COLOR[n.id]||"#e52535")}0d"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
