@@ -173,7 +173,7 @@ const BRAND_MARK = {"NOW":"NOW","YSL":"YSL","MFK":"MFK","Swisse":"SW","Blackmore
 const brandMark = b => { if(BRAND_MARK[b]) return BRAND_MARK[b]; const w = b.replace(/[^A-Za-z0-9' -]/g,"").split(/[\s-]+/).filter(Boolean); return (w.length>1 ? w[0][0]+w[1][0] : (w[0]||"?").slice(0,2)).toUpperCase(); };
 const brandChip = ([b,c]) => `<button class="btile" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}"><span class="bmark" style="background:${BRAND_COLOR[b]||`hsl(${hueOf(b)} 45% 38%)`}">${esc(brandMark(b))}</span><span class="bname">${esc(b)}</span><span class="bnum num">${c} ລາຍການ</span></button>`;
 const brandGrid = (arr) => `<div class="bgrid">${arr.map(brandChip).join("")}</div>`;
-const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb}</h3>${brandGrid(arr)}`:""; }).join(""); };
+const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb} <span class="num">· ${arr.length} ຍີ່ຫໍ້ ປັດເບິ່ງ ›</span></h3><div class="brow">${arr.map(brandChip).join("")}</div>`:""; }).join(""); };
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
@@ -222,7 +222,7 @@ function renderHome(){
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
     <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
-    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div>${brandGrid(brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,9))}</section>
+    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
