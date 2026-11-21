@@ -113,13 +113,14 @@ h2{font-size:17px;font-weight:800;margin:0;text-wrap:balance}
 .btile[aria-pressed="true"]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand) inset}
 .btile[aria-pressed="true"] .bname{color:var(--brand)}
 .bgroup{font-size:13px;margin:10px 0 6px;color:var(--fg);font-weight:700}.bgroup .num{color:var(--muted);font-weight:400;font-size:12px}
-.needs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.need{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0;font-size:12.5px;line-height:1.25;text-align:center}
-.need .dot{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--line)}
-.need .dot svg{width:28px;height:28px;color:var(--brand)}
-.need[aria-pressed="true"] .dot{background:var(--brand);border-color:var(--brand)}
-.need[aria-pressed="true"] .dot svg{color:#fff}
-.need .dot svg{flex:none}
+.needs{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:minmax(132px,40%);gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding:2px 4px 4px;scrollbar-width:none}
+.needs::-webkit-scrollbar{display:none}
+.need{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cb),var(--cb2));border:1px solid var(--cb);border-radius:14px;padding:8px 10px 8px 8px;font:700 12.5px/1.25 var(--f-text);color:var(--fg);text-align:left;cursor:pointer;scroll-snap-align:start;min-height:52px}
+.need .dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--c);flex:none;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.need .dot svg{width:20px;height:20px;color:#fff;flex:none}
+.need[aria-pressed="true"]{background:var(--c);color:#fff}
+.need[aria-pressed="true"] .dot{background:#fff}
+.need[aria-pressed="true"] .dot svg{color:var(--c)}
 
 /* product rows / grid */
 .row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,46%);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin-inline:-4px;padding-inline:4px}
@@ -274,7 +275,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 </div></nav>
 
 
-<script src="config.js?v=202611211830"></script>
-<script src="app.js?v=202611211830"></script>
+<script src="config.js?v=202611211900"></script>
+<script src="app.js?v=202611211900"></script>
 </body>
 </html>

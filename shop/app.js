@@ -182,7 +182,8 @@ function renderDrop(){
 function toggleDrop(open){ const d=$("#bdrop"), btn=$("#brandsBtn"); open = open===undefined ? d.hidden : open; if(open){ renderDrop(); d.scrollTop=0; } d.hidden=!open; btn.setAttribute("aria-expanded", String(open)); }
 const brandGrid = (arr) => `<div class="bgrid">${arr.map(brandChip).join("")}</div>`;
 const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb} <span class="num">· ${arr.length} ຍີ່ຫໍ້ ປັດເບິ່ງ ›</span></h3><div class="brow">${arr.map(brandChip).join("")}</div>`:""; }).join(""); };
-const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
+const NEED_COLOR = {"new":"#e53935","trial":"#ef6c00","immune":"#2e7d32","skin":"#d81b60","sleep":"#5e35b1","joint":"#1e88e5","liver":"#00897b","kids":"#f2a20c","women":"#c2185b","t:beauty":"#ec407a","t:perfume":"#8e24aa","t:sport":"#455a64"};
+const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${NEED_COLOR[n.id]||"#e52535"};--cb:${(NEED_COLOR[n.id]||"#e52535")}30;--cb2:${(NEED_COLOR[n.id]||"#e52535")}0d"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
 const vidsOf = id => V.filter(v=>(v.products||[]).includes(id)).sort((a,b)=>(b.n||0)-(a.n||0));
@@ -244,7 +245,7 @@ function renderAll(){
   const nm = filter ? (filter.startsWith("b:") ? "ຍີ່ຫໍ້ "+filter.slice(2) : ((NEEDS.find(n=>n.id===filter)||{}).lb || {best:"ຂາຍດີ",sale:"ສິນຄ້າໂປຣໂມຊັ່ນ"}[filter] || "")) : "ສິນຄ້າທັງໝົດ";
   return `<div class="wrap">
     <div class="sechead"><h2>${esc(query?`ຜົນຄົ້ນຫາ "${query}"`:nm)}</h2>${filter||query?'<button class="more" data-clear>ລ້າງຕົວກອງ</button>':''}</div>
-    ${filter&&filter.startsWith("b:")?`<button class="cta ghost" type="button" id="pickBrand" style="height:40px;font-size:14px">ເລືອກຍີ່ຫໍ້ອື່ນ ▾</button>`:`<div class="needs" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))">${NEEDS.map(needBtn).join("")}</div>`}
+    ${filter&&filter.startsWith("b:")?`<button class="cta ghost" type="button" id="pickBrand" style="height:40px;font-size:14px">ເລືອກຍີ່ຫໍ້ອື່ນ ▾</button>`:`<div class="needs">${NEEDS.map(needBtn).join("")}</div>`}
     <p class="note num" style="margin:0">${items.length.toLocaleString("en-US")} ລາຍການ</p>
     ${items.length?`<div class="grid">${items.slice(0,shown).map(card).join("")}</div>${items.length>shown?`<button class="cta ghost" data-more style="width:100%">ເບິ່ງເພີ່ມ (ເຫຼືອ <span class="num">${(items.length-shown).toLocaleString("en-US")}</span>)</button>`:''}`:`<div class="empty"><b>ບໍ່ພົບສິນຄ້າທີ່ຄົ້ນຫາ</b><span>ລອງພິມຊື່ອື່ນ ຫຼື ຖາມແອັດມິນທາງ WhatsApp</span></div>`}
   </div>`;
