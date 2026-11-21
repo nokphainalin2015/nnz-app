@@ -389,6 +389,16 @@ function openProduct(id){
         ${p.trials.map((t,k)=>`<button class="opt" data-opt="t${k}" aria-pressed="${opt==='t'+k}"><span class="t">${PART}</span><span class="s">${esc(t.qty)}</span><span class="p">${kip(t.price)}</span>${t.was>t.price?`<s class="note num">${kip(t.was)}</s>`:''}</button>`).join("")}
         ${p.full&&!p.trials.length?'<button class="opt" disabled><span class="t">ຂວດແບ່ງ</span><span class="s">ສິນຄ້ານີ້ບໍ່ມີຂວດແບ່ງ</span><span class="p">—</span></button>':''}
       </div>
+      ${p.stock?`<div class="buyrow"><div class="qty"><button data-q="-1" aria-label="ຫຼຸດ">−</button><span>${qty}</span><button data-q="1" aria-label="ເພີ່ມ">+</button></div>
+        <button class="cta" data-add>ໃສ່ກະຕ່າ · <span class="num">${kip(price*qty)}</span></button></div>`
+      :`<a class="cta ghost" href="${waLink('ແຈ້ງເຕືອນເມື່ອ '+p.nm+(p.en?' ('+p.en+')':'')+' ເຂົ້າໃໝ່ ແດ່')}" target="_blank" rel="noopener">ແຈ້ງເຕືອນຂ້ອຍເມື່ອສິນຄ້າເຂົ້າ</a>
+        <p class="note" style="margin:0">ກົດແລ້ວຈະເປີດ WhatsApp ພ້ອມຂໍ້ຄວາມ ໃຫ້ທ່ານກົດສົ່ງເອງ</p>`}
+      ${(()=>{const vs=PRODUCT_VIDEOS?vidsOf(p.id):[]; if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
+        return `<div class="pvid"><div class="sechead" style="margin:0"><h2 style="font-size:16px">ວິດີໂອສິນຄ້ານີ້</h2>${vs.length>1?`<button class="more" data-vnext>ຄລິບອື່ນ (${vi%vs.length+1}/${vs.length})</button>`:''}</div>
+        <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=0&description=0&music_info=0" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
+        <p class="note" style="margin:0">▶ ${esc(v.views||"")} ວິວ ໃນ TikTok · ${esc(ACC[v.acc]||"NNZ")}</p></div>`;})()}
+      ${p.tiktok?`<a class="clip" href="${esc(p.tiktok)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງຄລິບຣີວິວ</b><div class="note">ເປີດໃນ TikTok</div></div></a>`:''}
+      <p class="note" style="margin:0">ອາຫານເສີມບໍ່ແມ່ນຢາ ແລະ ບໍ່ໄດ້ໃຊ້ປິ່ນປົວພະຍາດ · ອ່ານວິທີກິນຢູ່ຂ້າງຂວດ</p>
       <div class="psteps" aria-label="ວິທີສັ່ງຊື້"><b class="ph">📝 ວິທີສັ່ງຊື້ 5 ຂັ້ນຕອນ</b><ol>
         <li><i>1</i><span>ເລືອກ <b>${FULL}</b> ຫຼື <b>${PART}</b></span></li>
         <li><i>2</i><span>ກົດ <b>+</b> <b>−</b> ເລືອກຈຳນວນ</span></li>
@@ -396,16 +406,6 @@ function openProduct(id){
         <li><i>4</i><span>ກົດ <b>ກະຕ່າ 🛒</b> ລຸ່ມຈໍ ກອກຊື່ ເບີ ທີ່ຢູ່</span></li>
         <li><i>5</i><span>ກົດ <b>ສົ່ງອໍເດີທາງ WhatsApp</b> ແລ້ວກົດສົ່ງ</span></li>
       </ol><p class="phelp">ບໍ່ເຂົ້າໃຈ? ກົດ <b>ແຊັດ</b> ຖາມແອັດມິນ 💬</p></div>
-      ${(()=>{const vs=PRODUCT_VIDEOS?vidsOf(p.id):[]; if(!vs.length) return ""; const v=vs[Math.min(vi,vs.length-1)];
-        return `<div class="pvid"><div class="sechead" style="margin:0"><h2 style="font-size:16px">ວິດີໂອສິນຄ້ານີ້</h2>${vs.length>1?`<button class="more" data-vnext>ຄລິບອື່ນ (${vi%vs.length+1}/${vs.length})</button>`:''}</div>
-        <div class="vplayer"><iframe src="https://www.tiktok.com/player/v1/${esc(v.id)}?autoplay=0&description=0&music_info=0" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="TikTok"></iframe></div>
-        <p class="note" style="margin:0">▶ ${esc(v.views||"")} ວິວ ໃນ TikTok · ${esc(ACC[v.acc]||"NNZ")}</p></div>`;})()}
-      ${p.tiktok?`<a class="clip" href="${esc(p.tiktok)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><b style="font-size:14px">ເບິ່ງຄລິບຣີວິວ</b><div class="note">ເປີດໃນ TikTok</div></div></a>`:''}
-      ${p.stock?`<div class="buyrow"><div class="qty"><button data-q="-1" aria-label="ຫຼຸດ">−</button><span>${qty}</span><button data-q="1" aria-label="ເພີ່ມ">+</button></div>
-        <button class="cta" data-add>ໃສ່ກະຕ່າ · <span class="num">${kip(price*qty)}</span></button></div>`
-      :`<a class="cta ghost" href="${waLink('ແຈ້ງເຕືອນເມື່ອ '+p.nm+(p.en?' ('+p.en+')':'')+' ເຂົ້າໃໝ່ ແດ່')}" target="_blank" rel="noopener">ແຈ້ງເຕືອນຂ້ອຍເມື່ອສິນຄ້າເຂົ້າ</a>
-        <p class="note" style="margin:0">ກົດແລ້ວຈະເປີດ WhatsApp ພ້ອມຂໍ້ຄວາມ ໃຫ້ທ່ານກົດສົ່ງເອງ</p>`}
-      <p class="note" style="margin:0">ອາຫານເສີມບໍ່ແມ່ນຢາ ແລະ ບໍ່ໄດ້ໃຊ້ປິ່ນປົວພະຍາດ · ອ່ານວິທີກິນຢູ່ຂ້າງຂວດ</p>
     </div></div>`;
   };
   draw(); document.body.appendChild(sh); document.body.style.overflow="hidden";
