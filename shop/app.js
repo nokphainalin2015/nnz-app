@@ -188,7 +188,7 @@ function renderHome(){
   if(loadErr) return `<div class="wrap"><div class="empty"><b>ໂຫຼດລາຍການສິນຄ້າບໍ່ໄດ້</b><span>${esc(loadErr)}</span><span>ຖາມແອັດມິນທາງ WhatsApp ໄດ້ເລີຍ</span></div></div>`;
   if(!P.length) return `<div class="wrap"><div class="empty"><b>ກຳລັງໂຫຼດສິນຄ້າ…</b></div></div>`;
   const pick = (f,n=12) => P.filter(f).slice(0,n);
-  const best = P.filter(p=>p.tags.includes("best")).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,12), news = pick(p=>p.tags.includes("new")), sale = pick(p=>p.tags.includes("sale")&&p.stock,16);
+  const best = P.filter(p=>p.tags.includes("best")&&p.stock).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,12), news = pick(p=>p.tags.includes("new")), sale = pick(p=>p.tags.includes("sale")&&p.stock,16);
   const trial = pick(p=>p.trial && p.type==="supplement"), perf = pick(p=>p.type==="perfume" && p.trial), beauty = pick(p=>p.type==="beauty");
   const rowSec = (title, need, arr, note="") => arr.length ? `<section><div class="sechead"><h2>${title}</h2><button class="more" data-need="${need}">ເບິ່ງທັງໝົດ</button></div>${note}<div class="row">${arr.map(card).join("")}</div></section>` : "";
   return `<div class="wrap">
