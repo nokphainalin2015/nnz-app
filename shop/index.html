@@ -121,6 +121,14 @@ h2{font-size:17px;font-weight:800;margin:0;text-wrap:balance}
 .need[aria-pressed="true"]{background:var(--c);color:#fff}
 .need[aria-pressed="true"] .dot{background:#fff}
 .need[aria-pressed="true"] .dot svg{color:var(--c)}
+.ncards{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding:2px 4px 6px;scrollbar-width:none}
+.ncards::-webkit-scrollbar{display:none}
+.ncard{flex:0 0 100px;display:flex;flex-direction:column;border:0;padding:0;border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;scroll-snap-align:start;text-align:left}
+.ncard .nimg{display:block;height:84px;background:#f3efe9;overflow:hidden}
+.ncard .nph{display:grid;place-items:center;height:100%;color:var(--c)}.ncard .nph svg{width:36px;height:36px}
+.ncard .nlab{position:relative;display:flex;align-items:center;min-height:32px;padding:4px 6px 4px 13px;background:var(--c);color:#fff;font:700 12px/1.2 var(--f-text)}
+.ncard .nlab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--leaf);clip-path:polygon(0 0,60% 0,100% 50%,60% 100%,0 100%)}
+.ncard[aria-pressed="true"]{outline:3px solid var(--c);outline-offset:-3px}
 
 /* product rows / grid */
 .row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,46%);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin-inline:-4px;padding-inline:4px}
@@ -275,7 +283,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 </div></nav>
 
 
-<script src="config.js?v=202611211900"></script>
-<script src="app.js?v=202611211900"></script>
+<script src="config.js?v=202611211930"></script>
+<script src="app.js?v=202611211930"></script>
 </body>
 </html>

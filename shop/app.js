@@ -183,6 +183,17 @@ function toggleDrop(open){ const d=$("#bdrop"), btn=$("#brandsBtn"); open = open
 const brandGrid = (arr) => `<div class="bgrid">${arr.map(brandChip).join("")}</div>`;
 const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb} <span class="num">· ${arr.length} ຍີ່ຫໍ້ ປັດເບິ່ງ ›</span></h3><div class="brow">${arr.map(brandChip).join("")}</div>`:""; }).join(""); };
 const NEED_COLOR = {"new":"#e53935","trial":"#ef6c00","immune":"#2e7d32","skin":"#d81b60","sleep":"#5e35b1","joint":"#1e88e5","liver":"#00897b","kids":"#f2a20c","women":"#c2185b","t:beauty":"#ec407a","t:perfume":"#8e24aa","t:sport":"#455a64"};
+// ບັດໝວດໝູ່ມີຮູບ (ແຖວດຽວ ປັດຂ້າງ): ເລືອກຮູບສິນຄ້າຈິງຂອງໝວດນັ້ນ ເອົາຮູບ NNZ ໃໝ່ (pg_) ແລະ ສິນຄ້າຂາຍດີກ່ອນ ບໍ່ໃຫ້ຮູບຊ້ຳກັນ
+function needCards(){
+  const used = new Set();
+  return NEEDS.map(n=>{
+    const pool = P.filter(p=>p.photo && p.stock && !used.has(p.photo) && (n.id==="trial" ? !!p.trial : p.tags.includes(n.id)));
+    pool.sort((a,b)=>((a.rank||99)-(b.rank||99)) || ((/pg_/.test(b.photo)?1:0)-(/pg_/.test(a.photo)?1:0)));
+    const p = pool[0]; if(p) used.add(p.photo);
+    const c = NEED_COLOR[n.id]||"#e52535";
+    return `<button class="ncard" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${c}"><span class="nimg">${p?pic(p):`<span class="nph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>`}</span><span class="nlab">${n.lb}</span></button>`;
+  }).join("");
+}
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}" style="--c:${NEED_COLOR[n.id]||"#e52535"};--cb:${(NEED_COLOR[n.id]||"#e52535")}30;--cb2:${(NEED_COLOR[n.id]||"#e52535")}0d"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
@@ -230,7 +241,7 @@ function renderHome(){
     ${rowSec("🔥 ສິນຄ້າຂາຍດີ ທີ່ລູກຄ້າສັ່ງຫຼາຍທີ່ສຸດ","best",best,'<p class="note" style="margin:-4px 0 10px">ຈັດອັນດັບຈາກຍອດສັ່ງຊື້ຈິງຂອງຮ້ານ · ລູກຄ້າເລືອກຊື້ຊ້ຳຫຼາຍທີ່ສຸດ</p>')}
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
-    <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
+    <section><div class="sechead"><h2>ເລືອກຕາມໝວດ</h2></div><div class="ncards">${needCards()}</div></section>
     <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brow">${brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,14).map(brandChip).join("")}</div></section>
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
