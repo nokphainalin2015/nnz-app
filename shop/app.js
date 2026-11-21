@@ -165,7 +165,15 @@ function list(){
   return filter==="best" ? r.sort((a,b)=>(a.rank||99)-(b.rank||99)) : r;
 }
 const brandCounts = () => { const m={}; P.forEach(p=>{ if(p.bk) m[p.bk]=(m[p.bk]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); };
-const brandChip = ([b,c]) => `<button class="bchip" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}">${esc(b)} <span class="num">${c}</span></button>`;
+// ຍີ່ຫໍ້ແບ່ງເປັນ 3 ກຸ່ມ ຕາມປະເພດສິນຄ້າສ່ວນໃຫຍ່ຂອງຍີ່ຫໍ້ນັ້ນ
+const BRAND_GROUPS = [["vit","ວິຕາມິນ ແລະ ອາຫານເສີມ"],["beauty","ເຄື່ອງສຳອາງ"],["perfume","ນ້ຳຫອມ"]];
+const brandGroupOf = b => { const t={}; P.forEach(p=>{ if(p.bk===b){ const g = p.type==="beauty"?"beauty":p.type==="perfume"?"perfume":"vit"; t[g]=(t[g]||0)+1; } }); return Object.entries(t).sort((a,c)=>c[1]-a[1])[0][0]; };
+const BRAND_COLOR = {"Swisse":"#1f3c88","Healthy Care":"#2e7d32","Blackmores":"#7b1f2e","Nature's Way":"#c62828","Nature's Bounty":"#4a2c82","Nature Made":"#1b5e20","Kirkland":"#b71c1c","Life Space":"#e46c0a","NOW":"#0b5aa6","Bio Island":"#0097b2","Elevit":"#8e3a9d","Centrum":"#0d47a1","Caruso's":"#1a237e","La Roche-Posay":"#1565c0","CeraVe":"#1e88e5","Dior":"#222","Chanel":"#111","YSL":"#111","Armani":"#333","PediaSure":"#5e35b1","Ostelin":"#f57c00","Micro Organics":"#00897b"};
+const BRAND_MARK = {"NOW":"NOW","YSL":"YSL","MFK":"MFK","Swisse":"SW","Blackmores":"BM","Kirkland":"KL","Centrum":"CT","Elevit":"EL","Ostelin":"OS","Natrol":"NT","NeoCell":"NC","Wagner":"WG","Musashi":"MS","Caruso's":"CR","PediaSure":"PS","Alula":"AL","CeraVe":"CV","Aveeno":"AV","Dior":"DIOR","Chanel":"CC","Armani":"GA","Burberry":"BB","Gucci":"GG","Versace":"VS","Prada":"PR","Lancome":"LC","Vaseline":"VS","Berocca":"BR","Bioglan":"BG","Cenovis":"CN","Colgate":"CG","Vicks":"VK","Selsun":"SS","Rifold":"RF","Sambucol":"SB","Brauer":"BR","Youtheory":"YT","Eaoron":"EA","Armaf":"AF","Delta":"DT","Fatblaster":"FB"};
+const brandMark = b => { if(BRAND_MARK[b]) return BRAND_MARK[b]; const w = b.replace(/[^A-Za-z0-9' -]/g,"").split(/[\s-]+/).filter(Boolean); return (w.length>1 ? w[0][0]+w[1][0] : (w[0]||"?").slice(0,2)).toUpperCase(); };
+const brandChip = ([b,c]) => `<button class="btile" data-need="b:${esc(b)}" aria-pressed="${filter==='b:'+b}"><span class="bmark" style="background:${BRAND_COLOR[b]||`hsl(${hueOf(b)} 45% 38%)`}">${esc(brandMark(b))}</span><span class="bname">${esc(b)}</span><span class="bnum num">${c} ລາຍການ</span></button>`;
+const brandGrid = (arr) => `<div class="bgrid">${arr.map(brandChip).join("")}</div>`;
+const brandSections = () => { const all = brandCounts(); return BRAND_GROUPS.map(([g,lb])=>{ const arr = all.filter(([b])=>brandGroupOf(b)===g); return arr.length?`<h3 class="bgroup">${lb}</h3>${brandGrid(arr)}`:""; }).join(""); };
 const needBtn = n => `<button class="need" data-need="${n.id}" aria-pressed="${filter===n.id}"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${n.ic}</svg></span>${n.lb}</button>`;
 
 let V = [];
@@ -214,7 +222,7 @@ function renderHome(){
     ${rowSec("🎁 ສິນຄ້າໂປຣໂມຊັ່ນ","sale",sale,'<p class="note" style="margin:-4px 0 10px">ລາຄາພິເສດ ແລະ ຂອງແຖມ · ມີຈຳນວນຈຳກັດ</p>')}
     ${V.length?`<section><div class="sechead"><h2>ວິດີໂອຍອດນິຍົມ</h2><a class="more" href="https://www.tiktok.com/@nnz_vitaminofficial" target="_blank" rel="noopener">TikTok</a></div><div class="row vrow">${V.filter(v=>v.row!==false).slice(0,16).map(vidCard).join("")}</div></section>`:''}
     <section><div class="sechead"><h2>ເລືອກຕາມສິ່ງທີ່ຕ້ອງການ</h2></div><div class="needs">${NEEDS.map(needBtn).join("")}</div></section>
-    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div><div class="brands">${brandCounts().slice(0,14).map(brandChip).join("")}</div></section>
+    <section><div class="sechead"><h2>ເລືອກຕາມຍີ່ຫໍ້</h2><button class="more" data-brands>ທຸກຍີ່ຫໍ້</button></div>${brandGrid(brandCounts().filter(([b])=>brandGroupOf(b)==="vit").slice(0,9))}</section>
     ${rowSec("ຂວດແບ່ງ ຊື້ລອງກ່ອນ","trial",trial,'<p class="note" style="margin:-4px 0 10px">ແບ່ງຈາກຂວດໃຫຍ່ ໂດຍທີມທີ່ໃສ່ຖົງມື ຜ້າກັນເປື້ອນ ແລະ ໝວກ · ຕິດວິທີກິນທຸກຂວດ</p>')}
     ${rowSec("ສິນຄ້າໃໝ່","new",news)}
     ${rowSec("ນ້ຳຫອມ ມີແບ່ງ 10ml","t:perfume",perf)}
@@ -229,7 +237,7 @@ function renderAll(){
   return `<div class="wrap">
     <div class="sechead"><h2>${esc(query?`ຜົນຄົ້ນຫາ "${query}"`:nm)}</h2>${filter||query?'<button class="more" data-clear>ລ້າງຕົວກອງ</button>':''}</div>
     <div class="needs" style="grid-template-columns:repeat(auto-fill,minmax(72px,1fr))">${NEEDS.map(needBtn).join("")}</div>
-    <details class="brandbox"${filter&&filter.startsWith("b:")||showBrands?" open":""}><summary>ເລືອກຕາມຍີ່ຫໍ້</summary><div class="brands">${brandCounts().map(brandChip).join("")}</div></details>
+    <details class="brandbox"${filter&&filter.startsWith("b:")||showBrands?" open":""}><summary>ເລືອກຕາມຍີ່ຫໍ້</summary>${brandSections()}</details>
     <p class="note num" style="margin:0">${items.length.toLocaleString("en-US")} ລາຍການ</p>
     ${items.length?`<div class="grid">${items.slice(0,shown).map(card).join("")}</div>${items.length>shown?`<button class="cta ghost" data-more style="width:100%">ເບິ່ງເພີ່ມ (ເຫຼືອ <span class="num">${(items.length-shown).toLocaleString("en-US")}</span>)</button>`:''}`:`<div class="empty"><b>ບໍ່ພົບສິນຄ້າທີ່ຄົ້ນຫາ</b><span>ລອງພິມຊື່ອື່ນ ຫຼື ຖາມແອັດມິນທາງ WhatsApp</span></div>`}
   </div>`;
